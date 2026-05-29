@@ -1,0 +1,21 @@
+company,sector,region,annual_plastic_use_tonnes,recycling_rate_pct,reduction_target_2030_pct,reduction_achieved_pct,alternative_material_adopted,plastic_replaced_tonnes,pledge_year,revenue_usd_m,carbon_kg_per_tonne
+GreenPack Solutions,Packaging,Europe,45000,68,50,34,Recycled Paper,15300,2021,320,2.1
+OceanSafe Foods,Food & Beverage,Asia Pacific,12000,45,40,28,Bioplastic,3360,2022,85,2.8
+CleanCycle Retail,Retail,North America,28000,72,60,41,Recycled Plastic,11480,2020,540,1.8
+FiberFuture Fashion,Textiles,Asia Pacific,85000,18,45,12,Organic Cotton,10200,2022,1200,4.2
+PureCare Cosmetics,Cosmetics,Europe,8500,38,35,22,Glass,1870,2021,95,3.1
+EcoShip Logistics,Logistics,North America,62000,55,55,38,Cardboard,23560,2020,780,2.4
+NaturePack Foods,Food & Beverage,Europe,19000,52,50,35,Recycled Plastic,6650,2021,145,2.2
+ClearVision Retail,Retail,Asia Pacific,34000,61,45,30,Recycled Paper,10200,2022,420,2.6
+TextileForward,Textiles,Asia Pacific,120000,12,30,8,Recycled Polyester,9600,2023,2100,5.1
+BioBeauty Co,Cosmetics,Europe,6200,42,55,40,Aluminium,2480,2020,72,2.9
+SwiftDeliver,Logistics,North America,41000,48,40,25,Cardboard,10250,2022,510,2.7
+FreshCycle Foods,Food & Beverage,Europe,23000,58,60,42,Bioplastic,9660,2021,198,2.3
+PackRight Industries,Packaging,North America,78000,74,65,50,Recycled Plastic,39000,2020,890,1.9
+StyleCircle Fashion,Textiles,North America,95000,22,40,18,Recycled Polyester,17100,2022,3200,4.5
+GlowNatural Beauty,Cosmetics,Asia Pacific,4800,35,45,28,Glass,1344,2021,58,3.3
+QuickPack Logistics,Logistics,Asia Pacific,38000,44,35,20,Cardboard,7600,2023,340,2.9
+HarvestPack Foods,Food & Beverage,North America,31000,62,55,38,Recycled Paper,11780,2021,265,2.1
+CircleStore Retail,Retail,Europe,52000,66,50,35,Recycled Plastic,18200,2020,680,2.0
+InduPlas Manufacturing,Industrial,Asia Pacific,145000,35,30,15,Recycled Plastic,21750,2022,4800,3.8
+EcoMold Industrial,Industrial,Europe,68000,48,45,28,Bioplastic,19040,2021,920,2.6

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plastic Reduction Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b1120;--card:#141e2e;--card2:#1a2640;--border:#1f3050;
+  --text:#e8edf4;--muted:#6a85a8;
+  --teal:#2ec4b6;--coral:#ef4444;--amber:#f59e0b;--green:#22c55e;
+  --blue:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--slate:#475569;
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh;}
+
+/* ── Header ── */
+.header{
+  background:linear-gradient(135deg,#080f1e 0%,#0d1e38 40%,#071828 100%);
+  border-bottom:1px solid var(--border);padding:30px 48px 28px;
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.logo-row{display:flex;align-items:center;gap:14px;}
+.logo-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--teal),#0ea5e9);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.logo-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.02em;}
+.logo-sub{font-size:11px;color:var(--teal);margin-top:2px;font-weight:500;letter-spacing:0.08em;}
+.header-tag{
+  background:rgba(46,196,182,0.1);border:1px solid rgba(46,196,182,0.25);
+  color:var(--teal);padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.08em;
+}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.kpi{padding:20px 24px;border-right:1px solid var(--border);position:relative;overflow:hidden;}
+.kpi:last-child{border-right:none;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.red::before{background:var(--coral);}
+.kpi.amber::before{background:var(--amber);}
+.kpi.teal::before{background:var(--teal);}
+.kpi.blue::before{background:var(--blue);}
+.kpi-num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;line-height:1;margin-bottom:6px;}
+.kpi.red .kpi-num{color:var(--coral);}
+.kpi.amber .kpi-num{color:var(--amber);}
+.kpi.teal .kpi-num{color:var(--teal);}
+.kpi.blue .kpi-num{color:var(--blue);}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;}
+.kpi-note{font-size:10px;color:var(--muted);margin-top:3px;opacity:0.7;}
+
+/* ── Layout ── */
+.page{max-width:1280px;margin:0 auto;padding:28px 24px 60px;}
+.section-label{
+  font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:0.14em;color:var(--teal);text-transform:uppercase;
+  margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.mb{margin-bottom:18px;}
+
+/* ── Cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.ch240{position:relative;height:240px;}
+.ch280{position:relative;height:280px;}
+.ch300{position:relative;height:300px;}
+
+/* ── Waffle ── */
+.waffle-wrap{display:flex;gap:40px;align-items:center;flex-wrap:wrap;}
+.waffle-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;flex-shrink:0;}
+.wc{
+  width:26px;height:26px;border-radius:5px;cursor:default;
+  transition:transform 0.15s,filter 0.15s;
+}
+.wc:hover{transform:scale(1.25);filter:brightness(1.15);}
+.wc.recycled{background:var(--teal);}
+.wc.incinerated{background:var(--amber);}
+.wc.landfill{background:#2d3f55;}
+.wc.ocean{background:var(--coral);}
+.waffle-legend{display:flex;flex-direction:column;gap:20px;}
+.wl-item{display:flex;align-items:flex-start;gap:12px;}
+.wl-dot{width:18px;height:18px;border-radius:5px;flex-shrink:0;margin-top:2px;}
+.wl-big{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;line-height:1;}
+.wl-name{font-size:12px;font-weight:600;color:var(--text);margin-top:1px;}
+.wl-desc{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ── Progress bars ── */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.prog-name{font-size:10px;color:var(--text);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog-track{flex:1;position:relative;height:10px;background:var(--border);border-radius:5px;overflow:visible;}
+.prog-fill{height:100%;border-radius:5px;max-width:100%;}
+.prog-target{position:absolute;top:-4px;width:2px;height:18px;background:rgba(255,255,255,0.35);border-radius:1px;transform:translateX(-50%);}
+.prog-pct{font-size:10px;font-weight:700;width:32px;text-align:right;flex-shrink:0;}
+
+/* ── Tableau note ── */
+.tableau-strip{
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  padding:18px 22px;margin-top:18px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+}
+.t-item{text-align:center;}
+.t-icon{font-size:18px;margin-bottom:4px;}
+.t-name{font-size:10px;font-weight:600;color:var(--teal);margin-bottom:2px;}
+.t-how{font-size:9px;color:var(--muted);line-height:1.4;}
+
+.footer{text-align:center;margin-top:40px;font-size:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-row">
+      <div class="logo-icon">♻️</div>
+      <div>
+        <div class="logo-title">Plastic Reduction Intelligence</div>
+        <div class="logo-sub">Global Manufacturing &amp; Packaging · 2025 Report</div>
+      </div>
+    </div>
+    <div class="header-tag">20 COMPANIES · DEMO DATA</div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi red">
+      <div class="kpi-num">430M</div>
+      <div class="kpi-label">Tonnes Plastic Produced Annually</div>
+      <div class="kpi-note">↑ 4% year on year</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-num">19%</div>
+      <div class="kpi-label">Actually Recycled</div>
+      <div class="kpi-note">Target: 50% by 2030</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-num">28%</div>
+      <div class="kpi-label">Avg Reduction Achieved</div>
+      <div class="kpi-note">Across 20 tracked companies</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-num">2030</div>
+      <div class="kpi-label">UN Plastic Treaty Deadline</div>
+      <div class="kpi-note">5 years remaining</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── 1. Waffle ── -->
+  <div class="section-label">Where Does Plastic Go? · Annual Fate of 430 Million Tonnes</div>
+  <div class="card mb">
+    <div class="card-title">Plastic Fate · Unit Visualiser</div>
+    <div class="card-sub">Each square = 1% of all plastic produced this year. Hover for detail. Only the teal squares are recovered and reused.</div>
+    <div class="waffle-wrap">
+      <div>
+        <div class="waffle-grid" id="waffleGrid"></div>
+        <div style="margin-top:10px;font-size:9px;color:var(--muted);">10 × 10 grid · each cell = 4.3 million tonnes</div>
+      </div>
+      <div class="waffle-legend">
+        <div class="wl-item">
+          <div class="wl-dot" style="background:var(--teal);"></div>
+          <div>
+            <div class="wl-big" style="color:var(--teal);">19%</div>
+            <div class="wl-name">Recycled</div>
+            <div class="wl-desc">81.7M tonnes reprocessed into new material</div>
+          </div>
+        </div>
+        <div class="wl-item">
+          <div class="wl-dot" style="background:var(--amber);"></div>
+          <div>
+            <div class="wl-big" style="color:var(--amber);">24%</div>
+            <div class="wl-name">Incinerated / Energy Recovery</div>
+            <div class="wl-desc">103.2M tonnes burned — energy reclaimed, material lost</div>
+          </div>
+        </div>
+        <div class="wl-item">
+          <div class="wl-dot" style="background:#2d3f55;"></div>
+          <div>
+            <div class="wl-big" style="color:var(--muted);">40%</div>
+            <div class="wl-name">Landfill</div>
+            <div class="wl-desc">172M tonnes buried — sits for 450+ years</div>
+          </div>
+        </div>
+        <div class="wl-item">
+          <div class="wl-dot" style="background:var(--coral);"></div>
+          <div>
+            <div class="wl-big" style="color:var(--coral);">17%</div>
+            <div class="wl-name">Ocean / Environment</div>
+            <div class="wl-desc">73.1M tonnes leaked — never recovered</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Radar + Bubble ── -->
+  <div class="section-label">Material Intelligence · Industry Positioning</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Material Alternatives Radar</div>
+      <div class="card-sub">6 performance dimensions scored 0–100. Higher = better. Recycled plastic &amp; aluminium lead on recyclability.</div>
+      <div class="ch280"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Industry Leaders &amp; Laggards</div>
+      <div class="card-sub">Bubble size = annual plastic use. X axis = current recycling rate · Y axis = 2030 reduction target.</div>
+      <div class="ch280"><canvas id="bubbleChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── 3. Trend ── -->
+  <div class="section-label">Production Trajectory · 2015–2030</div>
+  <div class="card mb">
+    <div class="card-title">Plastic Production Index vs UN Treaty Target Path</div>
+    <div class="card-sub">Index 100 = 2015 baseline. Dashed green = required reduction pace. Orange dashes = current projected trajectory. Gap = the problem.</div>
+    <div class="ch240"><canvas id="trendChart"></canvas></div>
+  </div>
+
+  <!-- ── 4. Sector + Progress ── -->
+  <div class="section-label">Sector Breakdown · Company Reduction Progress</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Plastic Waste by Sector</div>
+      <div class="card-sub">Million tonnes per year. Packaging alone generates 33% of all plastic waste.</div>
+      <div class="ch300"><canvas id="sectorChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Reduction Progress vs 2030 Target</div>
+      <div class="card-sub">Bar = achieved · Line marker = target. Sorted by largest gap. Red = critical, amber = behind, green = on track.</div>
+      <div id="progressBars" style="overflow-y:auto;max-height:320px;padding-right:4px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Tableau guide ── -->
+  <div class="section-label" style="margin-top:8px;">Tableau Build Guide · How to Recreate Each Chart</div>
+  <div class="tableau-strip">
+    <div class="t-item">
+      <div class="t-icon">🟦</div>
+      <div class="t-name">Waffle / Unit Chart</div>
+      <div class="t-how">Index calc → square number field. Colour by fate category. Works as a square scatter plot.</div>
+    </div>
+    <div class="t-item">
+      <div class="t-icon">🕸️</div>
+      <div class="t-name">Radar Chart</div>
+      <div class="t-how">Reshape to long format. Use circular layout with path calculations or Radar Extension.</div>
+    </div>
+    <div class="t-item">
+      <div class="t-icon">🫧</div>
+      <div class="t-name">Bubble Chart</div>
+      <div class="t-how">Native in Tableau — recycling_rate on X, target on Y, plastic_use as Size. Colour by sector.</div>
+    </div>
+    <div class="t-item">
+      <div class="t-icon">📈</div>
+      <div class="t-name">Dual Line + Target</div>
+      <div class="t-how">Dual-axis line chart. Actual + projection on one axis, target on second. Reference line for 2030.</div>
+    </div>
+    <div class="t-item">
+      <div class="t-icon">📊</div>
+      <div class="t-name">Progress Bars</div>
+      <div class="t-how">Gantt bar chart. achieved as bar length, target as reference line. Colour by gap %. Sort descending.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">Plastic Reduction Intelligence · Demo Data · visualizepro.com.au · 2025</div>
+
+<script>
+const TEAL='#2ec4b6',CORAL='#ef4444',AMBER='#f59e0b',GREEN='#22c55e';
+const BLUE='#3b82f6',PURPLE='#8b5cf6',PINK='#ec4899',MUTED='#6a85a8';
+const BORDER='#1f3050',TEXT='#e8edf4';
+
+Chart.defaults.color=MUTED;
+Chart.defaults.font.family="'Inter',system-ui,sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.padding=12;
+
+const SECTOR_COLORS={'Packaging':TEAL,'Food & Beverage':BLUE,'Retail':PURPLE,'Textiles':AMBER,'Cosmetics':PINK,'Logistics':MUTED,'Industrial':CORAL};
+
+const companies=[
+  {name:'GreenPack Solutions',    sector:'Packaging',      use:45000, recycling:68,target:50,achieved:34},
+  {name:'OceanSafe Foods',        sector:'Food & Beverage',use:12000, recycling:45,target:40,achieved:28},
+  {name:'CleanCycle Retail',      sector:'Retail',         use:28000, recycling:72,target:60,achieved:41},
+  {name:'FiberFuture Fashion',    sector:'Textiles',       use:85000, recycling:18,target:45,achieved:12},
+  {name:'PureCare Cosmetics',     sector:'Cosmetics',      use:8500,  recycling:38,target:35,achieved:22},
+  {name:'EcoShip Logistics',      sector:'Logistics',      use:62000, recycling:55,target:55,achieved:38},
+  {name:'NaturePack Foods',       sector:'Food & Beverage',use:19000, recycling:52,target:50,achieved:35},
+  {name:'ClearVision Retail',     sector:'Retail',         use:34000, recycling:61,target:45,achieved:30},
+  {name:'TextileForward',         sector:'Textiles',       use:120000,recycling:12,target:30,achieved:8},
+  {name:'BioBeauty Co',           sector:'Cosmetics',      use:6200,  recycling:42,target:55,achieved:40},
+  {name:'SwiftDeliver',           sector:'Logistics',      use:41000, recycling:48,target:40,achieved:25},
+  {name:'FreshCycle Foods',       sector:'Food & Beverage',use:23000, recycling:58,target:60,achieved:42},
+  {name:'PackRight Industries',   sector:'Packaging',      use:78000, recycling:74,target:65,achieved:50},
+  {name:'StyleCircle Fashion',    sector:'Textiles',       use:95000, recycling:22,target:40,achieved:18},
+  {name:'GlowNatural Beauty',     sector:'Cosmetics',      use:4800,  recycling:35,target:45,achieved:28},
+  {name:'QuickPack Logistics',    sector:'Logistics',      use:38000, recycling:44,target:35,achieved:20},
+  {name:'HarvestPack Foods',      sector:'Food & Beverage',use:31000, recycling:62,target:55,achieved:38},
+  {name:'CircleStore Retail',     sector:'Retail',         use:52000, recycling:66,target:50,achieved:35},
+  {name:'InduPlas Manufacturing', sector:'Industrial',     use:145000,recycling:35,target:30,achieved:15},
+  {name:'EcoMold Industrial',     sector:'Industrial',     use:68000, recycling:48,target:45,achieved:28},
+];
+
+// ── Waffle ────────────────────────────────────────────────────────────────────
+(function(){
+  const grid=document.getElementById('waffleGrid');
+  const blocks=[
+    {cls:'recycled',   n:19, tip:'Recycled — 81.7M tonnes'},
+    {cls:'incinerated',n:24, tip:'Incinerated — 103.2M tonnes'},
+    {cls:'landfill',   n:40, tip:'Landfill — 172M tonnes'},
+    {cls:'ocean',      n:17, tip:'Ocean / Environment — 73.1M tonnes'},
+  ];
+  blocks.forEach(b=>{
+    for(let i=0;i<b.n;i++){
+      const el=document.createElement('div');
+      el.className=`wc ${b.cls}`;
+      el.title=b.tip;
+      grid.appendChild(el);
+    }
+  });
+})();
+
+// ── Radar ─────────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('radarChart'),{
+  type:'radar',
+  data:{
+    labels:['Recyclability','Low Carbon','Durability','Affordability','Biodegradability','Lightweight'],
+    datasets:[
+      {label:'Conventional Plastic',data:[40,15,90,95,5,95], borderColor:CORAL, backgroundColor:'rgba(239,68,68,0.08)', borderWidth:2,pointRadius:3},
+      {label:'Recycled Plastic',    data:[75,60,82,72,5,90], borderColor:TEAL,  backgroundColor:'rgba(46,196,182,0.08)',borderWidth:2,pointRadius:3},
+      {label:'Glass',               data:[88,40,78,45,0,15], borderColor:BLUE,  backgroundColor:'rgba(59,130,246,0.08)',borderWidth:2,pointRadius:3},
+      {label:'Paper / Cardboard',   data:[80,72,42,65,88,55],borderColor:AMBER, backgroundColor:'rgba(245,158,11,0.08)',borderWidth:2,pointRadius:3},
+      {label:'Bioplastic (PLA)',    data:[30,75,52,48,82,75],borderColor:GREEN, backgroundColor:'rgba(34,197,94,0.06)', borderWidth:2,pointRadius:3},
+      {label:'Aluminium',           data:[95,50,90,52,0,38], borderColor:PURPLE,backgroundColor:'rgba(139,92,246,0.06)',borderWidth:2,pointRadius:3},
+    ]
+  },
+  options:{
+    scales:{r:{
+      grid:{color:BORDER},angleLines:{color:BORDER},
+      pointLabels:{color:TEXT,font:{size:10,weight:'500'}},
+      ticks:{display:false},min:0,max:100,
+    }},
+    plugins:{legend:{position:'bottom',labels:{font:{size:10},color:MUTED,boxWidth:8}}},
+  }
+});
+
+// ── Bubble ────────────────────────────────────────────────────────────────────
+(function(){
+  const grouped={};
+  companies.forEach(c=>{
+    if(!grouped[c.sector]) grouped[c.sector]=[];
+    grouped[c.sector].push({x:c.recycling,y:c.target,r:Math.sqrt(c.use/900),name:c.name,sector:c.sector});
+  });
+  new Chart(document.getElementById('bubbleChart'),{
+    type:'bubble',
+    data:{datasets:Object.entries(grouped).map(([s,pts])=>({
+      label:s,data:pts,
+      backgroundColor:(SECTOR_COLORS[s]||MUTED)+'88',
+      borderColor:SECTOR_COLORS[s]||MUTED,borderWidth:1.5,
+    }))},
+    options:{
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:10},color:MUTED,boxWidth:8}},
+        tooltip:{callbacks:{label:ctx=>[ctx.raw.name,`Recycling: ${ctx.raw.x}%`,`Target: ${ctx.raw.y}%`]}},
+      },
+      scales:{
+        x:{min:0,max:85,grid:{color:BORDER},ticks:{callback:v=>v+'%'},
+           title:{display:true,text:'Current Recycling Rate',color:MUTED,font:{size:10}}},
+        y:{min:0,max:75,grid:{color:BORDER},ticks:{callback:v=>v+'%'},
+           title:{display:true,text:'2030 Reduction Target',color:MUTED,font:{size:10}}},
+      }
+    }
+  });
+})();
+
+// ── Trend line ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('trendChart'),{
+  type:'line',
+  data:{
+    labels:['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030'],
+    datasets:[
+      {label:'Actual Production',   data:[100,104,108,113,116,110,115,118,121,119,116,null,null,null,null,null],
+       borderColor:CORAL,backgroundColor:'rgba(239,68,68,0.12)',borderWidth:2.5,fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:CORAL},
+      {label:'Required Target Path',data:[100,97,94,91,88,85,82,78,74,70,66,61,56,50,43,50],
+       borderColor:GREEN,backgroundColor:'rgba(34,197,94,0.06)',borderWidth:2,fill:true,tension:0.3,borderDash:[7,4],pointRadius:0},
+      {label:'Projected (current pace)',data:[null,null,null,null,null,null,null,null,null,119,116,113,110,107,104,101],
+       borderColor:AMBER,backgroundColor:'transparent',borderWidth:2,tension:0.3,borderDash:[4,3],pointRadius:0},
+    ]
+  },
+  options:{
+    plugins:{legend:{position:'top',labels:{color:MUTED,font:{size:11}}}},
+    scales:{
+      y:{min:40,max:130,grid:{color:BORDER},ticks:{color:MUTED},
+         title:{display:true,text:'Index (2015 = 100)',color:MUTED,font:{size:10}}},
+      x:{grid:{color:BORDER},ticks:{color:MUTED}},
+    }
+  }
+});
+
+// ── Sector bar ────────────────────────────────────────────────────────────────
+new Chart(document.getElementById('sectorChart'),{
+  type:'bar',
+  data:{
+    labels:['Packaging','Textiles','Consumer Goods','Construction','Industrial','Electronics','Automotive','Other'],
+    datasets:[{
+      label:'M tonnes/yr',
+      data:[141,42,37,28,22,18,12,22],
+      backgroundColor:[TEAL,AMBER,PURPLE,BLUE,CORAL,PINK,GREEN,MUTED],
+      borderRadius:5,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x}M tonnes/year`}}},
+    scales:{
+      x:{grid:{color:BORDER},ticks:{color:MUTED,callback:v=>v+'M'}},
+      y:{grid:{display:false},ticks:{color:TEXT}},
+    }
+  }
+});
+
+// ── Progress bars ─────────────────────────────────────────────────────────────
+(function(){
+  const el=document.getElementById('progressBars');
+  const sorted=[...companies].sort((a,b)=>(b.target-b.achieved)-(a.target-a.achieved));
+  sorted.forEach(c=>{
+    const pct=Math.round((c.achieved/c.target)*100);
+    const col=pct>=80?GREEN:pct>=55?AMBER:CORAL;
+    const targetLeft=Math.min((c.target/80)*100,100);
+    const fillWidth=Math.min((c.achieved/80)*100,100);
+    el.insertAdjacentHTML('beforeend',`
+      <div class="prog-row">
+        <div class="prog-name" title="${c.name} · ${c.sector}">${c.name}</div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+            <span style="font-size:9px;color:${SECTOR_COLORS[c.sector]||MUTED};">${c.sector}</span>
+            <span style="font-size:9px;color:${MUTED};">${c.achieved}% of ${c.target}% target</span>
+          </div>
+          <div class="prog-track">
+            <div class="prog-fill" style="width:${fillWidth}%;background:${col};"></div>
+            <div class="prog-target" style="left:${targetLeft}%;"></div>
+          </div>
+        </div>
+        <div class="prog-pct" style="color:${col};">${pct}%</div>
+      </div>`);
+  });
+})();
+</script>
+</body>
+</html>
