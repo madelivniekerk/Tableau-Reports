@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAPLAN School Intelligence · visualizepro.com.au</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0d1117;color:#e8edf4;font-family:'Inter',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.07;}
+.page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:48px 24px 80px;}
+.header{text-align:center;margin-bottom:40px;}
+.badge{display:inline-block;background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.3);color:#d4af37;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.08em;margin-bottom:16px;}
+.header h1{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;background:linear-gradient(135deg,#e8edf4,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header p{font-size:14px;color:#6a85a8;}
+
+/* Hero stats */
+.hero-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.hero-card{background:rgba(22,33,55,0.7);border:1px solid #1f3050;border-radius:14px;padding:20px 16px;text-align:center;backdrop-filter:blur(10px);}
+.hero-card.gold{border-color:rgba(212,175,55,0.4);background:rgba(212,175,55,0.08);}
+.hero-label{font-size:11px;font-weight:600;letter-spacing:0.06em;color:#6a85a8;text-transform:uppercase;margin-bottom:8px;}
+.hero-value{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#e8edf4;line-height:1;}
+.hero-card.gold .hero-value{color:#d4af37;}
+.hero-sub{font-size:11px;color:#4a6080;margin-top:4px;}
+
+/* Cards */
+.card{background:rgba(16,24,40,0.85);border:1px solid #1f3050;border-radius:18px;padding:28px;margin-bottom:24px;backdrop-filter:blur(12px);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:#e8edf4;}
+.card-sub{font-size:12px;color:#4a6080;margin-top:4px;display:block;}
+.card-header{margin-bottom:22px;}
+
+/* Hex map */
+.hex-map-wrap{display:flex;justify-content:center;}
+#hexMap{width:100%;max-width:420px;}
+
+/* Gap heatmap */
+.heatmap-table{width:100%;border-collapse:separate;border-spacing:3px;font-size:12px;}
+.heatmap-table th{font-size:10px;font-weight:600;letter-spacing:0.05em;color:#6a85a8;text-align:center;padding:4px 6px;}
+.heatmap-table td{text-align:center;padding:8px 6px;border-radius:6px;font-weight:600;font-size:12px;color:#e8edf4;}
+.hm-state{text-align:left !important;color:#8a9bb5;font-size:11px;font-weight:500;background:none !important;}
+
+/* Radar + Journey */
+.chart-box{position:relative;height:300px;}
+
+/* Equity scatter */
+.equity-box{position:relative;height:360px;}
+
+/* Bump chart */
+.bump-box{position:relative;height:320px;}
+
+/* Tables */
+.table-filters{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.table-filters select,.table-filters input{background:#141e2e;border:1px solid #1f3050;color:#e8edf4;padding:8px 12px;border-radius:8px;font-size:13px;outline:none;}
+.table-filters select:focus,.table-filters input:focus{border-color:#d4af37;}
+.table-wrap{overflow-x:auto;}
+.rank-table{width:100%;border-collapse:collapse;font-size:13px;}
+.rank-table th{padding:10px 12px;text-align:left;font-size:11px;font-weight:600;letter-spacing:0.05em;color:#6a85a8;text-transform:uppercase;border-bottom:1px solid #1f3050;cursor:pointer;user-select:none;}
+.rank-table th:hover{color:#d4af37;}
+.rank-table td{padding:10px 12px;border-bottom:1px solid rgba(31,48,80,0.5);}
+.rank-table tr:hover td{background:rgba(212,175,55,0.04);}
+.rank-num{font-family:'Space Grotesk',sans-serif;font-weight:700;color:#d4af37;width:40px;}
+.badge-sector{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:0.04em;}
+.badge-govt{background:rgba(74,144,226,0.15);color:#4a90e2;border:1px solid rgba(74,144,226,0.3);}
+.badge-cath{background:rgba(224,123,57,0.15);color:#e07b39;border:1px solid rgba(224,123,57,0.3);}
+.badge-ind{background:rgba(212,175,55,0.15);color:#d4af37;border:1px solid rgba(212,175,55,0.3);}
+.badge-loc{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;color:#6a85a8;background:rgba(106,133,168,0.1);}
+.score-bar-wrap{display:flex;align-items:center;gap:8px;}
+.score-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#4a90e2,#d4af37);}
+.score-val{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:#e8edf4;min-width:32px;}
+.icsea-val{font-size:12px;color:#6a85a8;}
+.trend-up{color:#2ec4b6;font-size:13px;}
+.trend-dn{color:#e07b39;font-size:13px;}
+.no-results{text-align:center;padding:40px;color:#4a6080;font-size:14px;}
+
+/* Annotation box */
+.annotation{background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);border-radius:10px;padding:14px 18px;margin-top:18px;font-size:12px;color:#a08040;line-height:1.6;}
+.annotation strong{color:#d4af37;}
+
+.footer{text-align:center;margin-top:48px;font-size:11px;color:#3a4a60;}
+
+@media(max-width:768px){
+  .hero-row{grid-template-columns:repeat(2,1fr);}
+  .grid-2{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="page">
+
+  <div class="header">
+    <div class="badge">🎓 NAPLAN INTELLIGENCE</div>
+    <h1>Australia School Performance Dashboard</h1>
+    <p>National Assessment Program · Literacy &amp; Numeracy · 2015–2023 · Demonstrative data based on real NAPLAN statistics</p>
+  </div>
+
+  <div class="hero-row">
+    <div class="hero-card">
+      <div class="hero-label">Government Avg</div>
+      <div class="hero-value">494</div>
+      <div class="hero-sub">7,200 schools</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">Catholic Avg</div>
+      <div class="hero-value">512</div>
+      <div class="hero-sub">1,700 schools</div>
+    </div>
+    <div class="hero-card gold">
+      <div class="hero-label">Independent Avg</div>
+      <div class="hero-value">531</div>
+      <div class="hero-sub">1,100 schools</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">Private–Public Gap</div>
+      <div class="hero-value" style="color:#e07b39;">+37 pts</div>
+      <div class="hero-sub">Ind. vs Govt</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">Metro–Remote Gap</div>
+      <div class="hero-value" style="color:#e07b39;">−52 pts</div>
+      <div class="hero-sub">disadvantage</div>
+    </div>
+  </div>
+
+  <!-- Row 1: Hex Map + Gap Heatmap -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">State Performance Map</span>
+        <span class="card-sub">Average NAPLAN score · Year 5 Numeracy · 2023 · colour = performance</span>
+      </div>
+      <div class="hex-map-wrap">
+        <svg id="hexMap" viewBox="0 0 480 440"></svg>
+      </div>
+      <div class="annotation">
+        <strong>ACT leads</strong> every year — smaller, more affluent population and high public-service concentration drives above-average results. <strong>NT sits 72 points below</strong> the national mean, driven by remote Indigenous community schools with severe resource gaps.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Private–Public Gap by State &amp; Domain</span>
+        <span class="card-sub">Independent minus Government · score points · darker = larger gap</span>
+      </div>
+      <div id="gapHeatmap"></div>
+      <div class="annotation">
+        <strong>Writing shows the largest gap</strong> nationally (+43 pts). <strong>NT has the smallest gap</strong> — both sectors perform poorly due to remote school concentration. <strong>ACT has the largest gap</strong> — high-performing independent schools pull far ahead.
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Radar + Journey -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">School DNA — Domain Profile by Sector</span>
+        <span class="card-sub">Year 5 · 2023 · all 5 NAPLAN domains</span>
+      </div>
+      <div class="chart-box"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Performance Journey · Year 3 → Year 9</span>
+        <span class="card-sub">Numeracy scores by sector · does the gap grow?</span>
+      </div>
+      <div class="chart-box"><canvas id="journeyChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Equity Scatter -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">The Equity Effect — Socio-Economic Advantage vs NAPLAN Score</span>
+      <span class="card-sub">Each bubble = one school · bubble size = student enrolment · ICSEA 1000 = national average socio-educational advantage</span>
+    </div>
+    <div class="equity-box"><canvas id="equityChart"></canvas></div>
+    <div class="annotation">
+      <strong>ICSEA explains ~82% of NAPLAN variance.</strong> A student at a high-advantage school (ICSEA 1150) is predicted to score ~55 points higher than one at a low-advantage school (ICSEA 850) — regardless of whether the school is public or private. The sector gap largely disappears once socio-economic advantage is controlled for.
+    </div>
+  </div>
+
+  <!-- State Rankings Bump -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">State Rankings 2015–2023</span>
+      <span class="card-sub">Rank 1 = highest scoring state · Year 9 Reading · watch WA rise and QLD recover</span>
+    </div>
+    <div class="bump-box"><canvas id="bumpChart"></canvas></div>
+  </div>
+
+  <!-- Top 100 Primary -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🏫 Top 100 Primary Schools</span>
+      <span class="card-sub">Ranked by Year 5 average across all 5 NAPLAN domains · 2023 · demonstrative data</span>
+    </div>
+    <div class="table-filters">
+      <select id="p-state"><option value="">All States</option></select>
+      <select id="p-sector"><option value="">All Sectors</option><option>Government</option><option>Catholic</option><option>Independent</option></select>
+      <select id="p-loc"><option value="">All Locations</option><option>Metropolitan</option><option>Regional</option><option>Remote</option></select>
+      <input id="p-search" type="text" placeholder="Search school name…" style="flex:1;min-width:160px;">
+    </div>
+    <div class="table-wrap"><table class="rank-table" id="primaryTable">
+      <thead><tr>
+        <th>#</th>
+        <th data-col="name">School</th>
+        <th data-col="state">State</th>
+        <th data-col="sector">Sector</th>
+        <th data-col="location">Location</th>
+        <th data-col="icsea">ICSEA ↕</th>
+        <th data-col="score">Avg Score ↕</th>
+      </tr></thead>
+      <tbody id="primaryBody"></tbody>
+    </table></div>
+  </div>
+
+  <!-- Top 100 Secondary -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🏛️ Top 100 Secondary Schools</span>
+      <span class="card-sub">Ranked by Year 9 average across all 5 NAPLAN domains · 2023 · demonstrative data</span>
+    </div>
+    <div class="table-filters">
+      <select id="s-state"><option value="">All States</option></select>
+      <select id="s-sector"><option value="">All Sectors</option><option>Government</option><option>Catholic</option><option>Independent</option></select>
+      <select id="s-loc"><option value="">All Locations</option><option>Metropolitan</option><option>Regional</option><option>Remote</option></select>
+      <input id="s-search" type="text" placeholder="Search school name…" style="flex:1;min-width:160px;">
+    </div>
+    <div class="table-wrap"><table class="rank-table" id="secondaryTable">
+      <thead><tr>
+        <th>#</th>
+        <th data-col="name">School</th>
+        <th data-col="state">State</th>
+        <th data-col="sector">Sector</th>
+        <th data-col="location">Location</th>
+        <th data-col="icsea">ICSEA ↕</th>
+        <th data-col="score">Avg Score ↕</th>
+      </tr></thead>
+      <tbody id="secondaryBody"></tbody>
+    </table></div>
+  </div>
+
+  <div class="footer">visualizepro.com.au · Built with Chart.js · Demonstrative NAPLAN data based on real national statistics · 2025</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ── Background animation ──────────────────────────────────────────────────────
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-×÷=%∑√πΩαβγΔ'.split('');
+let particles = [];
+function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+resizeBg();
+window.addEventListener('resize', resizeBg);
+for (let i = 0; i < 60; i++) {
+  particles.push({ x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight,
+    ch: chars[Math.floor(Math.random()*chars.length)], size: 10+Math.random()*16,
+    speed: 0.2+Math.random()*0.5, opacity: 0.3+Math.random()*0.5 });
+}
+function animateBg() {
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+  bgCtx.fillStyle = '#d4af37';
+  particles.forEach(p => {
+    bgCtx.globalAlpha = p.opacity;
+    bgCtx.font = `${p.size}px monospace`;
+    bgCtx.fillText(p.ch, p.x, p.y);
+    p.y -= p.speed;
+    if (p.y < -30) { p.y = bgCanvas.height+30; p.x = Math.random()*bgCanvas.width; p.ch = chars[Math.floor(Math.random()*chars.length)]; }
+  });
+  bgCtx.globalAlpha = 1;
+  requestAnimationFrame(animateBg);
+}
+animateBg();
+
+// ── Hex tile map ──────────────────────────────────────────────────────────────
+const hexData = [
+  { state:'NT',  avg:462, col:1, row:0 },
+  { state:'QLD', avg:502, col:2, row:0 },
+  { state:'WA',  avg:508, col:0, row:1 },
+  { state:'SA',  avg:498, col:1, row:1 },
+  { state:'NSW', avg:512, col:2, row:1 },
+  { state:'VIC', avg:518, col:2, row:2 },
+  { state:'ACT', avg:534, col:3, row:2 },
+  { state:'TAS', avg:491, col:1, row:2 },
+];
+const stateFullNames = { NT:'Northern Territory', QLD:'Queensland', WA:'Western Australia', SA:'South Australia', NSW:'New South Wales', VIC:'Victoria', ACT:'Australian Capital Territory', TAS:'Tasmania' };
+
+function scoreColor(score) {
+  const t = (score - 458) / (534 - 458);
+  const r = Math.round(180 - t*100);
+  const g = Math.round(40 + t*130);
+  const b = Math.round(20 + t*20);
+  return `rgb(${r},${g},${b})`;
+}
+function hexPoints(cx, cy, r) {
+  return Array.from({length:6}, (_,i) => {
+    const a = Math.PI/180*(60*i-30);
+    return `${cx+r*Math.cos(a)},${cy+r*Math.sin(a)}`;
+  }).join(' ');
+}
+const svg = document.getElementById('hexMap');
+const HW = 100, HR = 88, R = 42;
+const padding = { x:60, y:60 };
+hexData.forEach(h => {
+  const cx = padding.x + h.col * HW;
+  const cy = padding.y + h.row * HR;
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  poly.setAttribute('points', hexPoints(cx,cy,R));
+  poly.setAttribute('fill', scoreColor(h.avg));
+  poly.setAttribute('stroke','rgba(255,255,255,0.1)');
+  poly.setAttribute('stroke-width','1.5');
+  const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t1.setAttribute('x',cx); t1.setAttribute('y',cy-6);
+  t1.setAttribute('text-anchor','middle');
+  t1.setAttribute('fill','#fff');
+  t1.setAttribute('font-size','13');
+  t1.setAttribute('font-weight','700');
+  t1.setAttribute('font-family','Space Grotesk,sans-serif');
+  t1.textContent = h.state;
+  const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t2.setAttribute('x',cx); t2.setAttribute('y',cy+11);
+  t2.setAttribute('text-anchor','middle');
+  t2.setAttribute('fill','rgba(255,255,255,0.85)');
+  t2.setAttribute('font-size','12');
+  t2.setAttribute('font-family','Space Grotesk,sans-serif');
+  t2.textContent = h.avg;
+  g.appendChild(poly); g.appendChild(t1); g.appendChild(t2);
+  svg.appendChild(g);
+});
+// Legend
+const lgGrad = document.createElementNS('http://www.w3.org/2000/svg','defs');
+lgGrad.innerHTML = `<linearGradient id="lg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${scoreColor(458)}"/><stop offset="100%" stop-color="${scoreColor(534)}"/></linearGradient>`;
+svg.appendChild(lgGrad);
+const lgRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+lgRect.setAttribute('x','60'); lgRect.setAttribute('y','350');
+lgRect.setAttribute('width','300'); lgRect.setAttribute('height','12');
+lgRect.setAttribute('fill','url(#lg)'); lgRect.setAttribute('rx','4');
+svg.appendChild(lgRect);
+['458 (low)','496','534 (high)'].forEach((lbl,i) => {
+  const lt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  lt.setAttribute('x', 60 + i*150); lt.setAttribute('y','378');
+  lt.setAttribute('fill','#6a85a8'); lt.setAttribute('font-size','10');
+  lt.setAttribute('text-anchor', i===2?'end':'start');
+  lt.setAttribute('font-family','Inter,sans-serif');
+  lt.textContent = lbl;
+  svg.appendChild(lt);
+});
+
+// ── Gap Heatmap ───────────────────────────────────────────────────────────────
+const gapData = {
+  states: ['NSW','VIC','QLD','WA','SA','TAS','NT','ACT'],
+  domains: ['Reading','Writing','Numeracy','Spelling','Grammar'],
+  values: [
+    [34,42,30,36,32],[36,44,33,38,35],[32,40,28,34,30],[30,38,26,32,28],
+    [28,36,24,30,26],[26,34,22,28,24],[18,22,16,20,18],[40,48,36,42,38]
+  ]
+};
+function gapColor(v) {
+  const t = (v-14)/(50-14);
+  const r = Math.round(30 + t*200); const g = Math.round(150 - t*120); const b = Math.round(180 - t*160);
+  return `rgba(${r},${g},${b},0.75)`;
+}
+let hmHtml = `<table class="heatmap-table"><thead><tr><th></th>${gapData.domains.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+gapData.states.forEach((st,i) => {
+  hmHtml += `<tr><td class="hm-state">${st}</td>`;
+  gapData.values[i].forEach(v => {
+    hmHtml += `<td style="background:${gapColor(v)};color:#fff;">+${v}</td>`;
+  });
+  hmHtml += '</tr>';
+});
+hmHtml += '</tbody></table>';
+document.getElementById('gapHeatmap').innerHTML = hmHtml;
+
+// ── Radar Chart ───────────────────────────────────────────────────────────────
+new Chart(document.getElementById('radarChart'), {
+  type: 'radar',
+  data: {
+    labels: ['Reading','Writing','Numeracy','Spelling','Grammar'],
+    datasets: [
+      { label:'Government', data:[495,480,497,490,488], borderColor:'#4a90e2', backgroundColor:'rgba(74,144,226,0.12)', pointBackgroundColor:'#4a90e2', borderWidth:2 },
+      { label:'Catholic',   data:[513,500,510,508,505], borderColor:'#e07b39', backgroundColor:'rgba(224,123,57,0.12)',  pointBackgroundColor:'#e07b39', borderWidth:2 },
+      { label:'Independent',data:[532,522,535,528,526], borderColor:'#d4af37', backgroundColor:'rgba(212,175,55,0.12)', pointBackgroundColor:'#d4af37', borderWidth:2 }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#8a9bb5', font:{size:12} } } },
+    scales:{ r:{ min:470, max:545, ticks:{ color:'#4a6080', font:{size:10}, backdropColor:'transparent', stepSize:15 }, grid:{ color:'rgba(31,48,80,0.8)' }, angleLines:{ color:'rgba(31,48,80,0.8)' }, pointLabels:{ color:'#8a9bb5', font:{size:12} } } }
+  }
+});
+
+// ── Journey Chart ─────────────────────────────────────────────────────────────
+new Chart(document.getElementById('journeyChart'), {
+  type:'line',
+  data:{
+    labels:['Year 3','Year 5','Year 7','Year 9'],
+    datasets:[
+      { label:'Government', data:[390,490,540,560], borderColor:'#4a90e2', backgroundColor:'rgba(74,144,226,0.08)', tension:0.4, pointRadius:5, pointBackgroundColor:'#4a90e2', fill:false, borderWidth:2.5 },
+      { label:'Catholic',   data:[405,508,558,580], borderColor:'#e07b39', backgroundColor:'rgba(224,123,57,0.08)',  tension:0.4, pointRadius:5, pointBackgroundColor:'#e07b39', fill:false, borderWidth:2.5 },
+      { label:'Independent',data:[420,528,582,608], borderColor:'#d4af37', backgroundColor:'rgba(212,175,55,0.08)', tension:0.4, pointRadius:5, pointBackgroundColor:'#d4af37', fill:false, borderWidth:2.5 }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ labels:{ color:'#8a9bb5', font:{size:12} } } },
+    scales:{
+      x:{ grid:{ color:'rgba(31,48,80,0.5)' }, ticks:{ color:'#6a85a8' } },
+      y:{ grid:{ color:'rgba(31,48,80,0.5)' }, ticks:{ color:'#6a85a8' }, min:360, max:630 }
+    }
+  }
+});
+
+// ── Equity Scatter ────────────────────────────────────────────────────────────
+(function(){
+  let s=42;
+  function rnd(){ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }
+  const sectorCfg = [
+    { label:'Government', color:'rgba(74,144,226,0.7)',  icseaBase:950,  icseaRange:250, scoreBase:500, bonus:0,  count:80, enrollBase:400 },
+    { label:'Catholic',   color:'rgba(224,123,57,0.7)',  icseaBase:980,  icseaRange:200, scoreBase:500, bonus:5,  count:45, enrollBase:350 },
+    { label:'Independent',color:'rgba(212,175,55,0.75)', icseaBase:1020, icseaRange:200, scoreBase:500, bonus:15, count:35, enrollBase:450 }
+  ];
+  const datasets = sectorCfg.map(cfg => {
+    const pts = [];
+    for(let i=0;i<cfg.count;i++){
+      const icsea = Math.round(cfg.icseaBase + rnd()*cfg.icseaRange);
+      const score = Math.round(cfg.scoreBase + (icsea-1000)*0.09 + cfg.bonus + (rnd()-0.5)*28);
+      const enroll = Math.round(cfg.enrollBase + rnd()*800);
+      pts.push({ x:icsea, y:score, r: Math.max(4, Math.min(18, enroll/80)) });
+    }
+    return { label:cfg.label, data:pts, backgroundColor:cfg.color, borderColor:'transparent' };
+  });
+  new Chart(document.getElementById('equityChart'), {
+    type:'bubble',
+    data:{ datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#8a9bb5', font:{size:12} } },
+        tooltip:{ callbacks:{ label: ctx => `${ctx.dataset.label} · ICSEA ${ctx.raw.x} · Score ${ctx.raw.y}` } } },
+      scales:{
+        x:{ title:{ display:true, text:'ICSEA (Socio-Educational Advantage Index)', color:'#6a85a8', font:{size:12} }, grid:{ color:'rgba(31,48,80,0.5)' }, ticks:{ color:'#6a85a8' }, min:700, max:1250 },
+        y:{ title:{ display:true, text:'Average NAPLAN Score', color:'#6a85a8', font:{size:12} }, grid:{ color:'rgba(31,48,80,0.5)' }, ticks:{ color:'#6a85a8' }, min:430, max:600 }
+      }
+    }
+  });
+})();
+
+// ── Bump / Rankings Chart ─────────────────────────────────────────────────────
+(function(){
+  const years=['2015','2017','2019','2022','2023'];
+  const rankings = {
+    ACT: [1,1,1,1,1], VIC:[2,2,2,3,3], NSW:[3,3,4,4,4],
+    WA:  [4,4,3,2,2], SA:[5,5,5,5,6],  QLD:[6,6,6,6,5],
+    TAS: [7,7,7,7,7], NT:[8,8,8,8,8]
+  };
+  const colors = { ACT:'#d4af37', VIC:'#4a90e2', NSW:'#2ec4b6', WA:'#9b59b6', SA:'#e07b39', QLD:'#e74c3c', TAS:'#27ae60', NT:'#95a5a6' };
+  const datasets = Object.entries(rankings).map(([state,ranks]) => ({
+    label:state, data:ranks, borderColor:colors[state], backgroundColor:colors[state],
+    tension:0.3, pointRadius:6, pointHoverRadius:8, borderWidth:2.5, fill:false
+  }));
+  new Chart(document.getElementById('bumpChart'), {
+    type:'line',
+    data:{ labels:years, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'#8a9bb5', font:{size:12} } },
+        tooltip:{ callbacks:{ label: ctx=>`${ctx.dataset.label}: Rank #${ctx.raw}` } } },
+      scales:{
+        x:{ grid:{ color:'rgba(31,48,80,0.5)' }, ticks:{ color:'#6a85a8' } },
+        y:{ reverse:true, min:1, max:8, ticks:{ color:'#6a85a8', stepSize:1, callback: v=>`#${v}` }, grid:{ color:'rgba(31,48,80,0.5)' }, title:{ display:true, text:'National Rank', color:'#6a85a8' } }
+      }
+    }
+  });
+})();
+
+// ── School Data Generation ────────────────────────────────────────────────────
+(function(){
+  let seed=99991;
+  function rnd(){ seed=(seed*1664525+1013904223)&0xffffffff; return (seed>>>0)/0xffffffff; }
+
+  const suburbs={
+    NSW:['Mosman','Hunters Hill','Lane Cove','Willoughby','Chatswood','Lindfield','Killara','Gordon','Turramurra','Wahroonga','Pymble','St Ives','Roseville','Castlecrag','Cremorne','Neutral Bay','Balmain','Paddington','Woollahra','Double Bay','Manly','Seaforth','Forestville','Epping','Ryde','Parramatta','Penrith','Campbelltown','Liverpool','Blacktown','Sutherland','Cronulla','Hornsby','Berowra'],
+    VIC:['Toorak','Kew','Hawthorn','Camberwell','Balwyn','Box Hill','Doncaster','Eltham','Northcote','Carlton','Fitzroy','St Kilda','Malvern','Armadale','Prahran','Richmond','Brighton','Mentone','Glen Waverley','Burwood','Ringwood','Knox','Heidelberg','Ivanhoe','Essendon','Moonee Ponds','Yarraville','Williamstown','Frankston','Werribee'],
+    QLD:['New Farm','Ascot','Hamilton','Clayfield','Wavell Heights','Indooroopilly','Toowong','Paddington QLD','Taringa','Auchenflower','Bulimba','Kangaroo Point','Sunshine Beach','Noosa','Broadbeach','Palm Beach','Buderim','Maroochydore','Caloundra','Townsville','Cairns','Rockhampton','Bundaberg','Toowoomba','Ipswich'],
+    WA:['Cottesloe','Claremont','Nedlands','Subiaco','Mount Lawley','Highgate','South Perth','Como','Applecross','Brentwood','Kalamunda','Midland','Joondalup','Fremantle','Rockingham','Mandurah','Bunbury','Busselton','Margaret River','Albany'],
+    SA:['Norwood','Unley','Burnside','Stirling','Glenelg','Brighton SA','North Adelaide','Prospect','Henley Beach','Marion','Morphett Vale','Mount Barker','Strathalbyn','Victor Harbor','Port Elliot'],
+    TAS:['Sandy Bay','New Town','North Hobart','Battery Point','Launceston','Devonport','Burnie','Ulverstone','Deloraine','Scottsdale'],
+    NT:['Darwin City','Palmerston','Nightcliff','Casuarina','Alice Springs','Katherine','Tennant Creek','Nhulunbuy'],
+    ACT:['Braddon','Barton','Belconnen','Tuggeranong','Woden','Gungahlin','Manuka','Kingston','Forrest','Deakin']
+  };
+
+  const saintNames=['Mary','Joseph','Michael','Patrick','Anne','Clare','Ignatius','Francis','Anthony','Therese','Catherine','Agnes','Thomas','Brendan','Benedict','Luke','John','Peter','Paul','Monica'];
+  const indSuffixes=['Grammar School','Anglican College','Christian College','College','Grammar','Ladies College','Church Grammar'];
+  const govtPriSfx=['Primary School','Public School','State School'];
+  const govtSecSfx=['Secondary College','High School','State High School','Senior High School'];
+
+  function schoolName(sector, state, idx, type) {
+    const pool = suburbs[state] || suburbs.NSW;
+    const sub = pool[idx % pool.length];
+    if(sector==='Independent'){
+      return sub+' '+indSuffixes[idx % indSuffixes.length];
+    } else if(sector==='Catholic'){
+      const pre=['St ','St ','Our Lady of ','Sacred Heart ','Marist College '];
+      const nm = saintNames[idx % saintNames.length];
+      const p = pre[idx % pre.length];
+      return p==='Marist College ' ? p+sub : p+nm+"'s "+(type==='Primary'?'Primary School':'College');
+    } else {
+      const sfx = type==='Primary' ? govtPriSfx[idx%govtPriSfx.length] : govtSecSfx[idx%govtSecSfx.length];
+      return sub+' '+sfx;
+    }
+  }
+
+  const stateList=['NSW','NSW','NSW','NSW','VIC','VIC','VIC','QLD','QLD','WA','WA','SA','ACT','TAS','NT'];
+  const sectorDist=['Government','Government','Government','Government','Government','Catholic','Catholic','Independent'];
+
+  function genSchools(type) {
+    const schools=[];
+    const baseScore = type==='Primary' ? 500 : 545;
+
+    // Hardcoded top schools
+    const tops = type==='Primary' ? [
+      ['Sydney Grammar Prep','NSW','Independent','Metropolitan',1156,574,520],
+      ['Melbourne Grammar Junior','VIC','Independent','Metropolitan',1152,573,480],
+      ['Cranbrook Preparatory School','NSW','Independent','Metropolitan',1149,570,380],
+      ['Canberra Grammar Junior School','ACT','Independent','Metropolitan',1152,572,280],
+      ['Christ Church Grammar Junior','WA','Independent','Metropolitan',1150,570,360],
+      ['SCEGGS Darlinghurst Junior','NSW','Independent','Metropolitan',1146,567,290],
+      ['Brisbane Grammar Preparatory','QLD','Independent','Metropolitan',1148,568,320],
+      ["St Peter's College Junior SA",'SA','Independent','Metropolitan',1148,568,260],
+      ['Scotch College Junior VIC','VIC','Independent','Metropolitan',1147,569,440],
+      ['Geelong Grammar Junior School','VIC','Independent','Metropolitan',1144,566,410],
+      ['Kambala Junior School','NSW','Independent','Metropolitan',1143,564,240],
+      ['Xavier College Prep VIC','VIC','Independent','Metropolitan',1141,563,380],
+      ['Hale School Junior Campus','WA','Independent','Metropolitan',1146,566,340],
+      ['Ascham Junior School','NSW','Independent','Metropolitan',1140,561,210],
+      ["St Catherine's Junior School NSW",'NSW','Independent','Metropolitan',1137,558,270],
+      ['Wesley College Primary VIC','VIC','Independent','Metropolitan',1138,560,410],
+      ['Scotch College Perth Junior','WA','Independent','Metropolitan',1142,562,360],
+      ['Canberra Girls Grammar Junior','ACT','Independent','Metropolitan',1148,568,250],
+      ['Loreto Kirribilli Junior','NSW','Independent','Metropolitan',1134,555,290],
+      ['Haileybury Prep Campus','VIC','Independent','Metropolitan',1135,557,480],
+      ["Brisbane Girls Grammar Prep",'QLD','Independent','Metropolitan',1144,564,290],
+      ['Anglican Church Grammar Junior','QLD','Independent','Metropolitan',1140,560,310],
+      ['Pymble Ladies College Junior','NSW','Independent','Metropolitan',1131,552,380],
+      ['Carey Baptist Grammar Junior','VIC','Independent','Metropolitan',1132,554,360],
+      ['Pembroke Junior School','SA','Independent','Metropolitan',1144,564,280],
+      ['Knox Grammar Preparatory','NSW','Independent','Metropolitan',1128,549,430],
+      ['Camberwell Grammar Junior','VIC','Independent','Metropolitan',1129,551,350],
+      ['Methodist Ladies College Junior WA','WA','Independent','Metropolitan',1138,558,360],
+      ["The Southport School Junior",'QLD','Independent','Metropolitan',1132,552,270],
+      ['Radford College Junior ACT','ACT','Independent','Metropolitan',1144,564,260],
+      ['Chatswood Public School','NSW','Government','Metropolitan',1130,548,680],
+      ['Balwyn North Primary School','VIC','Government','Metropolitan',1135,548,590],
+      ['Willoughby Public School','NSW','Government','Metropolitan',1128,546,520],
+      ['Canterbury Primary School VIC','VIC','Government','Metropolitan',1130,544,510],
+      ['Hunters Hill Public School','NSW','Government','Metropolitan',1125,543,460],
+      ['Kew Primary School','VIC','Government','Metropolitan',1127,541,490],
+      ['Mosman Public School','NSW','Government','Metropolitan',1122,540,520],
+      ['Hawthorn West Primary School','VIC','Government','Metropolitan',1124,538,470],
+      ['Lane Cove Public School','NSW','Government','Metropolitan',1119,537,540],
+      ['Camberwell Primary School VIC','VIC','Government','Metropolitan',1121,535,510],
+      ['Killara Public School','NSW','Government','Metropolitan',1116,534,480],
+      ['Brighton Primary School VIC','VIC','Government','Metropolitan',1118,533,550],
+      ['Lindfield Public School','NSW','Government','Metropolitan',1113,531,460],
+      ['Malvern Primary School VIC','VIC','Government','Metropolitan',1115,530,490],
+      ["St Aloysius Primary NSW",'NSW','Catholic','Metropolitan',1070,535,410],
+      ["St Ignatius Primary NSW",'NSW','Catholic','Metropolitan',1068,533,390],
+      ["St Joseph's College Junior QLD",'QLD','Catholic','Metropolitan',1060,526,450],
+      ["Sacred Heart Primary VIC",'VIC','Catholic','Metropolitan',1065,530,380],
+      ["Marist Brothers Primary Roseville",'NSW','Catholic','Metropolitan',1062,528,420],
+      ["Our Lady of Mercy Primary ACT",'ACT','Catholic','Metropolitan',1058,525,350],
+    ] : [
+      ['Sydney Grammar School','NSW','Independent','Metropolitan',1158,592,1050],
+      ['James Ruse Agricultural High School','NSW','Government','Metropolitan',1140,589,1100],
+      ['Melbourne Grammar School','VIC','Independent','Metropolitan',1154,590,1200],
+      ['Cranbrook School','NSW','Independent','Metropolitan',1151,591,800],
+      ['North Sydney Boys High School','NSW','Government','Metropolitan',1135,585,1050],
+      ['SCEGGS Darlinghurst','NSW','Independent','Metropolitan',1148,588,680],
+      ['North Sydney Girls High School','NSW','Government','Metropolitan',1133,583,980],
+      ['Scotch College Melbourne','VIC','Independent','Metropolitan',1149,587,1150],
+      ['Baulkham Hills High School','NSW','Government','Metropolitan',1130,581,1200],
+      ['Geelong Grammar School','VIC','Independent','Metropolitan',1146,584,1100],
+      ['Canberra Grammar School','ACT','Independent','Metropolitan',1155,591,950],
+      ['Xavier College Melbourne','VIC','Independent','Metropolitan',1141,579,1050],
+      ['Christ Church Grammar School','WA','Independent','Metropolitan',1150,588,950],
+      ['Hornsby Girls High School','NSW','Government','Metropolitan',1128,580,1050],
+      ['Wesley College Melbourne','VIC','Independent','Metropolitan',1138,576,1200],
+      ['Hale School Perth','WA','Independent','Metropolitan',1146,582,900],
+      ['Brisbane Grammar School','QLD','Independent','Metropolitan',1148,584,1000],
+      ['MacRobertson Girls High School','VIC','Government','Metropolitan',1132,577,1000],
+      ['Presbyterion Ladies College Melbourne','VIC','Independent','Metropolitan',1142,580,900],
+      ['Brisbane Girls Grammar School','QLD','Independent','Metropolitan',1144,581,900],
+      ['Canberra Girls Grammar School','ACT','Independent','Metropolitan',1148,586,750],
+      ['The Southport School','QLD','Independent','Metropolitan',1132,570,800],
+      ["St Peter's College Adelaide",'SA','Independent','Metropolitan',1148,584,950],
+      ['Anglican Church Grammar School','QLD','Independent','Metropolitan',1140,576,1050],
+      ['Scotch College Perth','WA','Independent','Metropolitan',1142,577,900],
+      ['Pembroke School Adelaide','SA','Independent','Metropolitan',1144,579,850],
+      ["Blackburn High School",'VIC','Government','Metropolitan',1098,560,1200],
+      ["Pymble Ladies College",'NSW','Independent','Metropolitan',1131,568,1100],
+      ["Radford College ACT",'ACT','Independent','Metropolitan',1144,580,800],
+      ['Selective High School Chatswood','NSW','Government','Metropolitan',1120,565,950],
+      ["Knox Grammar School NSW",'NSW','Independent','Metropolitan',1128,563,1150],
+      ["Glen Waverley Secondary College",'VIC','Government','Metropolitan',1095,558,1400],
+      ["The King's School NSW",'NSW','Independent','Metropolitan',1125,560,1050],
+      ["Loreto College Brisbane",'QLD','Catholic','Metropolitan',1075,558,850],
+      ["St Aloysius College NSW",'NSW','Catholic','Metropolitan',1070,556,950],
+      ['Marist College North Shore','NSW','Catholic','Metropolitan',1065,552,1000],
+      ['Sacred Heart College WA','WA','Catholic','Metropolitan',1068,550,800],
+      ["St Joseph's College Brisbane",'QLD','Catholic','Metropolitan',1062,548,950],
+      ['Christian Brothers College SA','SA','Catholic','Metropolitan',1060,546,800],
+      ['Emmanuel Catholic College WA','WA','Catholic','Metropolitan',1058,544,850],
+    ];
+
+    tops.forEach((t,i)=>{
+      schools.push({ rank:0, name:t[0], state:t[1], sector:t[2], location:t[3], icsea:t[4], score:t[5], enrollment:t[6] });
+    });
+
+    // Generate more schools
+    for(let i=0; i<200; i++){
+      const stateIdx = Math.floor(rnd()*stateList.length);
+      const state = stateList[stateIdx];
+      const sectorIdx = Math.floor(rnd()*sectorDist.length);
+      const sector = sectorDist[sectorIdx];
+      const locW = rnd();
+      const location = locW<0.62 ? 'Metropolitan' : locW<0.85 ? 'Regional' : 'Remote';
+      let icsea = 1000;
+      if(sector==='Government') icsea = 820+Math.round(rnd()*280);
+      if(sector==='Catholic')   icsea = 900+Math.round(rnd()*220);
+      if(sector==='Independent')icsea = 980+Math.round(rnd()*200);
+      if(location==='Regional') icsea -= 60;
+      if(location==='Remote')   icsea -= 180;
+      icsea = Math.max(600, Math.min(1200, icsea));
+      let score = baseScore + Math.round((icsea-1000)*0.09);
+      if(sector==='Catholic')    score += 5;
+      if(sector==='Independent') score += 15;
+      if(location==='Regional')  score -= 8;
+      if(location==='Remote')    score -= 32;
+      score += Math.round((rnd()-0.5)*30);
+      score = Math.max(420, Math.min(580, score));
+      const enrollment = Math.round(200+rnd()*1400);
+      const name = schoolName(sector, state, i, type);
+      schools.push({ rank:0, name, state, sector, location, icsea, score, enrollment });
+    }
+    schools.sort((a,b)=>b.score-a.score);
+    // Deduplicate names
+    const seen=new Set();
+    return schools.filter(s=>{ if(seen.has(s.name)){return false;} seen.add(s.name); return true; })
+      .slice(0,100)
+      .map((s,i)=>({...s,rank:i+1}));
+  }
+
+  const primarySchools = genSchools('Primary');
+  const secondarySchools = genSchools('Secondary');
+
+  const states = [...new Set([...primarySchools,...secondarySchools].map(s=>s.state))].sort();
+
+  // Populate state dropdowns
+  ['p-state','s-state'].forEach(id=>{
+    const sel=document.getElementById(id);
+    states.forEach(st=>{ const o=document.createElement('option'); o.value=st; o.textContent=st; sel.appendChild(o); });
+  });
+
+  function sectorBadge(sector) {
+    const cls = sector==='Government'?'badge-govt':sector==='Catholic'?'badge-cath':'badge-ind';
+    return `<span class="badge-sector ${cls}">${sector}</span>`;
+  }
+
+  function renderTable(schools, bodyId, scoreRange) {
+    const [minS, maxS] = scoreRange;
+    const tbody = document.getElementById(bodyId);
+    if(!schools.length){ tbody.innerHTML=`<tr><td colspan="7" class="no-results">No schools match the selected filters.</td></tr>`; return; }
+    tbody.innerHTML = schools.map(s=>{
+      const barW = Math.round((s.score-minS)/(maxS-minS)*120);
+      return `<tr>
+        <td class="rank-num">${s.rank}</td>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.state}</td>
+        <td>${sectorBadge(s.sector)}</td>
+        <td><span class="badge-loc">${s.location}</span></td>
+        <td class="icsea-val">${s.icsea}</td>
+        <td><div class="score-bar-wrap"><div class="score-bar" style="width:${barW}px;"></div><span class="score-val">${s.score}</span></div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function filterAndRender(schools, stateId, sectorId, locId, searchId, bodyId, scoreRange) {
+    const st=document.getElementById(stateId).value;
+    const sc=document.getElementById(sectorId).value;
+    const lc=document.getElementById(locId).value;
+    const q=document.getElementById(searchId).value.toLowerCase();
+    let filtered = schools.filter(s=>
+      (!st || s.state===st) &&
+      (!sc || s.sector===sc) &&
+      (!lc || s.location===lc) &&
+      (!q  || s.name.toLowerCase().includes(q))
+    );
+    renderTable(filtered, bodyId, scoreRange);
+  }
+
+  const pScoreRange = [primarySchools[primarySchools.length-1]?.score||480, primarySchools[0]?.score||580];
+  const sScoreRange = [secondarySchools[secondarySchools.length-1]?.score||520, secondarySchools[0]?.score||595];
+
+  renderTable(primarySchools, 'primaryBody', pScoreRange);
+  renderTable(secondarySchools, 'secondaryBody', sScoreRange);
+
+  ['p-state','p-sector','p-loc','p-search'].forEach(id=>
+    document.getElementById(id).addEventListener('input', ()=>filterAndRender(primarySchools,'p-state','p-sector','p-loc','p-search','primaryBody',pScoreRange))
+  );
+  ['s-state','s-sector','s-loc','s-search'].forEach(id=>
+    document.getElementById(id).addEventListener('input', ()=>filterAndRender(secondarySchools,'s-state','s-sector','s-loc','s-search','secondaryBody',sScoreRange))
+  );
+})();
+</script>
+</body>
+</html>
