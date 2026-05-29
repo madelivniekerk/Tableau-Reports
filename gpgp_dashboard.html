@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Great Pacific Garbage Patch · Data Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ocean1:#020c1a;--ocean2:#041c34;--ocean3:#052840;
+  --teal:#0ea5e9;--teal2:#2ec4b6;--coral:#ef4444;--amber:#f59e0b;
+  --purple:#a855f7;--green:#22c55e;
+  --text:#d0e8f8;--muted:#5a8aaa;--faint:#2a4a68;
+}
+
+/* ── Water background ── */
+body{
+  min-height:100vh;color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  background-color:var(--ocean1);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% 25%, rgba(0,80,160,0.28) 0%,transparent 65%),
+    radial-gradient(ellipse 60% 70% at 85% 75%, rgba(0,50,120,0.22) 0%,transparent 65%),
+    radial-gradient(ellipse 100% 40% at 50% 0%,  rgba(0,120,200,0.12) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 80% at 30% 80%,  rgba(0,40,90,0.25)  0%,transparent 60%),
+    linear-gradient(180deg,#020c1a 0%,#031828 35%,#042035 65%,#020e1a 100%);
+  background-size:200% 200%,200% 200%,200% 150%,200% 200%,100% 100%;
+  animation:oceanDrift 22s ease-in-out infinite alternate;
+  position:relative;overflow-x:hidden;
+}
+@keyframes oceanDrift{
+  0%  {background-position:0% 50%,100% 50%,50% 0%,0% 100%,0% 0%;}
+  50% {background-position:60% 30%,40% 70%,80% 20%,20% 80%,0% 0%;}
+  100%{background-position:100% 0%,0% 100%,20% 80%,80% 20%,0% 0%;}
+}
+/* subtle caustic light shimmer */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 30% 20% at 20% 30%,rgba(14,165,233,0.06) 0%,transparent 70%),
+    radial-gradient(ellipse 25% 15% at 75% 60%,rgba(46,196,182,0.05) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 10% at 50% 80%,rgba(14,165,233,0.04) 0%,transparent 70%);
+  animation:caustic 8s ease-in-out infinite alternate;
+}
+@keyframes caustic{
+  0%  {opacity:0.6;transform:scale(1);}
+  100%{opacity:1;transform:scale(1.05);}
+}
+
+/* ── Header ── */
+.header{
+  position:relative;z-index:2;
+  background:rgba(2,12,26,0.82);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(14,165,233,0.18);
+  padding:28px 48px 24px;
+}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:20px;}
+.logo-group{display:flex;align-items:center;gap:14px;}
+.logo-icon{
+  width:48px;height:48px;border-radius:14px;flex-shrink:0;
+  background:linear-gradient(135deg,#0369a1,#0ea5e9,#2ec4b6);
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 0 20px rgba(14,165,233,0.4);
+}
+.logo-title{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:#e0f2fe;letter-spacing:-0.01em;}
+.logo-sub{font-size:11px;color:var(--teal);margin-top:3px;letter-spacing:0.07em;font-weight:500;}
+.live-counter{
+  text-align:right;background:rgba(239,68,68,0.1);
+  border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:10px 16px;
+}
+.counter-label{font-size:10px;color:#fca5a5;font-weight:600;letter-spacing:0.08em;margin-bottom:4px;}
+.counter-value{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:var(--coral);}
+.counter-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(14,165,233,0.15);border-radius:12px;overflow:hidden;}
+.kpi{padding:16px 20px;border-right:1px solid rgba(14,165,233,0.12);}
+.kpi:last-child{border-right:none;}
+.kpi-val{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:4px;}
+.kpi-lbl{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:0.03em;}
+.kpi-note{font-size:9px;color:var(--muted);opacity:0.65;margin-top:2px;}
+.kpi.c1 .kpi-val{color:var(--coral);}
+.kpi.c2 .kpi-val{color:var(--amber);}
+.kpi.c3 .kpi-val{color:var(--teal);}
+.kpi.c4 .kpi-val{color:var(--purple);}
+
+/* ── Page ── */
+.page{max-width:1280px;margin:0 auto;padding:24px 24px 60px;position:relative;z-index:2;}
+.sec{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.14em;color:var(--teal2);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--faint);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;}
+.mb{margin-bottom:18px;}
+
+/* ── Glass cards ── */
+.card{
+  background:rgba(4,28,60,0.72);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(14,165,233,0.14);
+  border-radius:16px;padding:22px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.35),inset 0 1px 0 rgba(14,165,233,0.08);
+}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:#e0f2fe;margin-bottom:3px;}
+.card-sub{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.ch220{position:relative;height:220px;}
+.ch260{position:relative;height:260px;}
+.ch300{position:relative;height:300px;}
+.ch200{position:relative;height:200px;}
+
+/* ── Gyre section ── */
+.gyre-wrap{
+  position:relative;margin-bottom:18px;
+  background:rgba(2,10,22,0.8);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(14,165,233,0.16);border-radius:16px;overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(14,165,233,0.08);
+}
+.gyre-header{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between;}
+.gyre-legend{
+  display:flex;gap:20px;padding:12px 22px 16px;flex-wrap:wrap;
+  border-top:1px solid var(--faint);margin-top:12px;
+}
+.gl-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);}
+.gl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.gyre-note{font-size:10px;color:var(--muted);font-style:italic;}
+
+/* ── Stat blocks ── */
+.stat-blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px;}
+.stat-block{
+  background:rgba(4,28,60,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid rgba(14,165,233,0.14);border-radius:14px;padding:18px 20px;text-align:center;
+}
+.sb-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:4px;}
+.sb-lbl{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:0.05em;}
+.sb-sub{font-size:9px;color:var(--muted);margin-top:2px;opacity:0.7;}
+
+/* ── Tableau guide ── */
+.t-guide{
+  background:rgba(4,28,60,0.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border:1px solid rgba(14,165,233,0.12);border-radius:14px;padding:18px 20px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px;
+}
+.tg-item{text-align:center;}
+.tg-icon{font-size:16px;margin-bottom:4px;}
+.tg-name{font-size:10px;font-weight:600;color:var(--teal2);margin-bottom:2px;}
+.tg-how{font-size:9px;color:var(--muted);line-height:1.4;}
+
+.footer{text-align:center;padding:16px;font-size:10px;color:var(--muted);position:relative;z-index:2;}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div class="header">
+  <div class="header-top">
+    <div class="logo-group">
+      <div class="logo-icon">🌊</div>
+      <div>
+        <div class="logo-title">Great Pacific Garbage Patch</div>
+        <div class="logo-sub">North Pacific Gyre · Data Intelligence Dashboard · 2023</div>
+      </div>
+    </div>
+    <div class="live-counter">
+      <div class="counter-label">⬤ PLASTIC ENTERING OCEAN SINCE PAGE LOAD</div>
+      <div class="counter-value" id="liveCounter">0 kg</div>
+      <div class="counter-sub">↑ 348.7 kg every second · 11 million tonnes per year</div>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi c1">
+      <div class="kpi-val">1.8T</div>
+      <div class="kpi-lbl">Pieces of Plastic</div>
+      <div class="kpi-note">In the patch right now</div>
+    </div>
+    <div class="kpi c2">
+      <div class="kpi-val">79,000t</div>
+      <div class="kpi-lbl">Total Weight</div>
+      <div class="kpi-note">Equivalent to 500 Jumbo Jets</div>
+    </div>
+    <div class="kpi c3">
+      <div class="kpi-val">1.6M km²</div>
+      <div class="kpi-lbl">Area Covered</div>
+      <div class="kpi-note">3× the size of France</div>
+    </div>
+    <div class="kpi c4">
+      <div class="kpi-val">450 yrs</div>
+      <div class="kpi-lbl">Plastic Lifespan</div>
+      <div class="kpi-note">Before it fully degrades</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── Gyre animation ── -->
+  <div class="sec">North Pacific Gyre · Live Particle Simulation</div>
+  <div class="gyre-wrap">
+    <div class="gyre-header">
+      <div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:#e0f2fe;">Plastic Accumulation Zone · Particle Simulation</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">Each particle represents a debris cluster. Inner gyre rotates faster — concentrating waste. Size = debris scale.</div>
+      </div>
+      <div class="gyre-note">Simulated · based on Ocean Cleanup survey data 2018</div>
+    </div>
+    <canvas id="gyreCanvas" style="display:block;width:100%;"></canvas>
+    <div class="gyre-legend">
+      <div class="gl-item"><div class="gl-dot" style="background:rgba(180,210,240,0.9);"></div>Hard plastic fragments (20%)</div>
+      <div class="gl-item"><div class="gl-dot" style="background:rgba(245,158,11,0.9);"></div>Ghost gear / fishing nets (46%)</div>
+      <div class="gl-item"><div class="gl-dot" style="background:rgba(168,85,247,0.85);"></div>Microplastics &lt;5mm (94% by count)</div>
+      <div class="gl-item"><div class="gl-dot" style="background:rgba(239,68,68,0.85);"></div>Large macroplastic debris</div>
+      <div class="gl-item"><div class="gl-dot" style="background:rgba(148,163,184,0.6);"></div>Plastic film / bags</div>
+    </div>
+  </div>
+
+  <!-- ── Composition + Depth ── -->
+  <div class="sec">Debris Composition · Depth Distribution</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Debris by Type</div>
+      <div class="card-sub">By weight. By piece count, microplastics dominate at 94% — but weigh only 4% of total mass.</div>
+      <div class="ch260"><canvas id="typeChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Plastic Concentration by Depth</div>
+      <div class="card-sub">Surface layers are most studied. Seafloor accumulation is likely vastly underestimated.</div>
+      <div class="ch260"><canvas id="depthChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── Growth timeline ── -->
+  <div class="sec">Patch Growth · 1945 – 2030</div>
+  <div class="card mb">
+    <div class="card-title">Estimated Patch Size Over Time (Million km²)</div>
+    <div class="card-sub">Based on Lebreton et al. (2018) modelling and Ocean Cleanup survey data. 2023–2030 projected if current plastic input continues unchecked.</div>
+    <div class="ch220"><canvas id="growthChart"></canvas></div>
+  </div>
+
+  <!-- ── Rivers + Species ── -->
+  <div class="sec">Source Rivers · Marine Species Impact</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Top 10 Rivers by Ocean Plastic Input</div>
+      <div class="card-sub">10 rivers account for ~90% of river-borne ocean plastic. Yangtze alone contributes 330,000 tonnes/year.</div>
+      <div class="ch300"><canvas id="riverChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Marine Species Affected</div>
+      <div class="card-sub">% of studied population showing plastic ingestion or entanglement. Albatross and sea turtles most critically impacted.</div>
+      <div class="ch300"><canvas id="speciesChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── Cleanup progress ── -->
+  <div class="sec">The Ocean Cleanup · Quarterly Removal Progress</div>
+  <div class="card mb">
+    <div class="card-title">Plastic Removed from GPGP — The Ocean Cleanup (kg per quarter)</div>
+    <div class="card-sub">System 002 launched Q1 2023. System 003 deployed Q4 2023. Total removed to date: ~549,000 kg — vs 79,000,000,000 kg in the patch. Scale of challenge illustrated below.</div>
+    <div class="ch220"><canvas id="cleanupChart"></canvas></div>
+  </div>
+
+  <!-- ── Context stats ── -->
+  <div class="stat-blocks">
+    <div class="stat-block">
+      <div class="sb-val" style="color:var(--coral);">549,100 kg</div>
+      <div class="sb-lbl">Total Removed by Ocean Cleanup</div>
+      <div class="sb-sub">Since 2023 operations began</div>
+    </div>
+    <div class="stat-block">
+      <div class="sb-val" style="color:var(--amber);">0.0007%</div>
+      <div class="sb-lbl">Of Patch Cleared So Far</div>
+      <div class="sb-sub">79 billion kg remains</div>
+    </div>
+    <div class="stat-block">
+      <div class="sb-val" style="color:var(--teal2);">~2050</div>
+      <div class="sb-lbl">Projected Full Cleanup Date</div>
+      <div class="sb-sub">If plastic input stops now</div>
+    </div>
+  </div>
+
+  <!-- ── Tableau build guide ── -->
+  <div class="sec">Tableau Build Guide</div>
+  <div class="t-guide">
+    <div class="tg-item"><div class="tg-icon">🫧</div><div class="tg-name">Gyre / Scatter</div><div class="tg-how">Plot lat/long with size = debris weight. Colour by type. Use custom background map.</div></div>
+    <div class="tg-item"><div class="tg-icon">🍩</div><div class="tg-name">Composition Donut</div><div class="tg-how">Pie/donut native in Tableau. Filter to plastic_type rows. Colour by label.</div></div>
+    <div class="tg-item"><div class="tg-icon">📊</div><div class="tg-name">Depth Profile</div><div class="tg-how">Horizontal bar. Filter data_type = depth. Sort descending by depth layer.</div></div>
+    <div class="tg-item"><div class="tg-icon">📈</div><div class="tg-name">Growth Timeline</div><div class="tg-how">Area line chart. Filter data_type = growth. Add reference band for projection years.</div></div>
+    <div class="tg-item"><div class="tg-icon">🌊</div><div class="tg-name">River Sources</div><div class="tg-how">Horizontal bar sorted descending. Or map view with custom geocoding per river mouth.</div></div>
+  </div>
+
+</div>
+
+<div class="footer">Great Pacific Garbage Patch Dashboard · Data sources: Lebreton et al. 2018 · Ocean Cleanup · OECD · visualizepro.com.au · 2025</div>
+
+<script>
+// ── Live counter ──────────────────────────────────────────────────────────────
+(function(){
+  const start=Date.now();
+  const rate=348.7; // kg/second entering ocean
+  function tick(){
+    const elapsed=(Date.now()-start)/1000;
+    const kg=elapsed*rate;
+    const fmt=kg>=1000000
+      ?`${(kg/1000000).toFixed(2)}M kg`
+      :kg>=1000
+      ?`${(kg/1000).toFixed(1)}t`
+      :`${Math.round(kg).toLocaleString()} kg`;
+    document.getElementById('liveCounter').textContent=fmt;
+  }
+  tick(); setInterval(tick,200);
+})();
+
+// ── Gyre particle animation ───────────────────────────────────────────────────
+(function(){
+  const canvas=document.getElementById('gyreCanvas');
+  const dpr=window.devicePixelRatio||1;
+  function resize(){
+    const w=canvas.parentElement.clientWidth;
+    const h=Math.round(w*0.38);
+    canvas.width=w*dpr; canvas.height=h*dpr;
+    canvas.style.height=h+'px';
+  }
+  resize(); window.addEventListener('resize',()=>{resize();initParticles();});
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  let cx,cy,rx,ry,particles=[];
+
+  function dims(){
+    cx=canvas.width/dpr/2; cy=canvas.height/dpr/2;
+    rx=canvas.width/dpr*0.42; ry=canvas.height/dpr*0.38;
+  }
+
+  const TYPES=[
+    {cls:'micro',   color:'rgba(168,85,247,',   sizeRange:[0.8,1.8], weight:72}, // 94% by count
+    {cls:'frag',    color:'rgba(180,210,240,',   sizeRange:[1.5,3.5], weight:16},
+    {cls:'film',    color:'rgba(148,163,184,',   sizeRange:[1.2,2.5], weight:7},
+    {cls:'ghost',   color:'rgba(245,158,11,',    sizeRange:[3,7],     weight:3},
+    {cls:'macro',   color:'rgba(239,68,68,',     sizeRange:[4,9],     weight:2},
+  ];
+
+  function pickType(){
+    const r=Math.random()*100;
+    let sum=0;
+    for(const t of TYPES){sum+=t.weight;if(r<sum)return t;}
+    return TYPES[0];
+  }
+
+  function initParticles(){
+    dims();
+    const N=700;
+    particles=[];
+    for(let i=0;i<N;i++){
+      const t=pickType();
+      // Bias distribution: use squared random for more central concentration
+      const rf=Math.random();
+      const r=(0.15+rf*rf*0.85); // 0.15–1.0 of max radius
+      const angle=Math.random()*Math.PI*2;
+      const actualR=r*(t.cls==='ghost'?0.7:1); // ghost gear more central
+      const sz=t.sizeRange[0]+Math.random()*(t.sizeRange[1]-t.sizeRange[0]);
+      const alpha=t.cls==='micro'?0.5+Math.random()*0.4:0.55+Math.random()*0.4;
+      particles.push({
+        angle,
+        r:actualR,
+        speed:(0.00018+(1-actualR)*0.00025)*(t.cls==='ghost'?0.7:1), // inner faster
+        drift:(Math.random()-0.5)*0.00008,
+        radialDrift:(Math.random()-0.5)*0.08,
+        size:sz,
+        color:t.color,
+        alpha,
+        phase:Math.random()*Math.PI*2,
+      });
+    }
+  }
+
+  // Gyre current lines
+  function drawCurrentLines(ctx){
+    ctx.save();
+    for(let ring=0.25;ring<=1;ring+=0.25){
+      ctx.beginPath();
+      for(let a=0;a<=Math.PI*2+0.01;a+=0.05){
+        const x=cx+Math.cos(a)*rx*ring;
+        const y=cy+Math.sin(a)*ry*ring;
+        a===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle=`rgba(14,165,233,${0.04+ring*0.03})`;
+      ctx.lineWidth=0.5;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // Geographic labels
+  function drawLabels(ctx){
+    ctx.save();
+    ctx.font="bold 11px 'Space Grotesk',sans-serif";
+    ctx.fillStyle='rgba(14,165,233,0.55)';
+    ctx.fillText('NORTH PACIFIC OCEAN',cx-65,cy-ry*1.05);
+    ctx.font="10px Inter,sans-serif";
+    ctx.fillStyle='rgba(14,165,233,0.45)';
+    ctx.fillText('↑ Alaska / Japan',cx+rx*0.55,cy-ry*0.6);
+    ctx.fillText('↓ Hawaii',cx+rx*0.3,cy+ry*0.75);
+    ctx.fillText('California →',cx+rx*0.72,cy+ry*0.1);
+    // GPGP label
+    ctx.font="bold 10px 'Space Grotesk',sans-serif";
+    ctx.fillStyle='rgba(239,68,68,0.6)';
+    ctx.fillText('GPGP CORE',cx-28,cy+5);
+    ctx.restore();
+  }
+
+  function draw(){
+    const w=canvas.width/dpr, h=canvas.height/dpr;
+    ctx.clearRect(0,0,w,h);
+
+    // Ocean floor gradient
+    const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,rx);
+    bg.addColorStop(0,'rgba(0,30,70,0.9)');
+    bg.addColorStop(0.4,'rgba(0,20,50,0.7)');
+    bg.addColorStop(1,'rgba(0,8,20,0.4)');
+    ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+
+    drawCurrentLines(ctx);
+
+    const t=Date.now()*0.001;
+    particles.forEach(p=>{
+      p.angle+=p.speed+p.drift*Math.sin(t*0.3+p.phase);
+      p.r+=p.radialDrift*0.015;
+      p.r=Math.max(0.08,Math.min(1,p.r));
+      const px=cx+Math.cos(p.angle)*rx*p.r;
+      const py=cy+Math.sin(p.angle)*ry*p.r;
+      const pulse=0.85+0.15*Math.sin(t*1.5+p.phase);
+      ctx.beginPath();
+      ctx.arc(px,py,p.size,0,Math.PI*2);
+      ctx.fillStyle=`${p.color}${(p.alpha*pulse).toFixed(2)})`;
+      ctx.fill();
+    });
+
+    // Central glow — the patch core
+    const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,rx*0.35);
+    glow.addColorStop(0,'rgba(239,68,68,0.07)');
+    glow.addColorStop(0.5,'rgba(245,158,11,0.04)');
+    glow.addColorStop(1,'transparent');
+    ctx.fillStyle=glow; ctx.fillRect(0,0,w,h);
+
+    drawLabels(ctx);
+    requestAnimationFrame(draw);
+  }
+  dims(); initParticles(); draw();
+})();
+
+// ── Chart.js defaults ─────────────────────────────────────────────────────────
+Chart.defaults.color='#5a8aaa';
+Chart.defaults.font.family="'Inter',system-ui,sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.padding=12;
+const GRID='rgba(14,165,233,0.09)';
+
+// ── Debris type donut ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('typeChart'),{
+  type:'doughnut',
+  data:{
+    labels:['Ghost Gear / Nets','Hard Plastic Fragments','Plastic Film / Bags','Foam / Polystyrene','Microplastics (<5mm)','Other'],
+    datasets:[{
+      data:[46,20,17,10,4,3],
+      backgroundColor:['rgba(245,158,11,0.85)','rgba(14,165,233,0.8)','rgba(148,163,184,0.75)','rgba(254,243,199,0.7)','rgba(168,85,247,0.85)','rgba(90,138,170,0.6)'],
+      borderColor:'rgba(4,28,60,0.5)',borderWidth:2,hoverOffset:8,
+    }]
+  },
+  options:{
+    cutout:'60%',
+    plugins:{
+      legend:{position:'right',labels:{color:'#93c5fd',font:{size:10},boxWidth:9}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}%`}}
+    }
+  }
+});
+
+// ── Depth chart ───────────────────────────────────────────────────────────────
+new Chart(document.getElementById('depthChart'),{
+  type:'bar',
+  data:{
+    labels:['Surface (0–0.5 m)','Subsurface (0.5–5 m)','Mid-water (5–30 m)','Deep water (30–200 m)','Seafloor'],
+    datasets:[{
+      label:'% Concentration',
+      data:[42,28,18,9,3],
+      backgroundColor:['rgba(14,165,233,0.85)','rgba(14,165,233,0.65)','rgba(14,165,233,0.45)','rgba(14,165,233,0.3)','rgba(14,165,233,0.18)'],
+      borderRadius:5,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x}% of sampled plastic`}}},
+    scales:{
+      x:{max:50,grid:{color:GRID},ticks:{color:'#5a8aaa',callback:v=>v+'%'}},
+      y:{grid:{display:false},ticks:{color:'#93c5fd',font:{size:10}}},
+    }
+  }
+});
+
+// ── Growth timeline ───────────────────────────────────────────────────────────
+(function(){
+  const labels=['1945','1960','1970','1980','1990','2000','2010','2015','2018','2021','2023','2030'];
+  const actual= [0.1,  0.2,  0.4,  0.65,  0.95, 1.2,  1.42, 1.55, 1.6,  1.68, 1.75, null];
+  const proj=   [null, null, null, null,  null, null, null, null, 1.6,  1.68, 1.75, 2.1];
+  new Chart(document.getElementById('growthChart'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Documented / Estimated',data:actual,borderColor:'rgba(14,165,233,0.9)',backgroundColor:'rgba(14,165,233,0.12)',borderWidth:2.5,fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'rgba(14,165,233,0.9)'},
+      {label:'Projected (no intervention)',data:proj,borderColor:'rgba(239,68,68,0.8)',backgroundColor:'rgba(239,68,68,0.06)',borderWidth:2,fill:true,tension:0.4,borderDash:[6,4],pointRadius:3,pointBackgroundColor:'rgba(239,68,68,0.8)'},
+    ]},
+    options:{
+      plugins:{legend:{position:'top',labels:{color:'#93c5fd'}}},
+      scales:{
+        y:{min:0,grid:{color:GRID},ticks:{color:'#5a8aaa',callback:v=>v+'M km²'},title:{display:true,text:'Million km²',color:'#5a8aaa',font:{size:10}}},
+        x:{grid:{color:GRID},ticks:{color:'#5a8aaa'}},
+      }
+    }
+  });
+})();
+
+// ── River sources ─────────────────────────────────────────────────────────────
+new Chart(document.getElementById('riverChart'),{
+  type:'bar',
+  data:{
+    labels:['Yangtze (China)','Indus (Pakistan)','Yellow (China)','Hai (China)','Nile (Africa)','Ganges (India)','Pearl (China)','Amur (Russia)','Niger (W.Africa)','Mekong (SE Asia)'],
+    datasets:[{
+      label:'Tonnes/year',
+      data:[330000,164000,124000,91000,84500,72800,52700,38500,35000,33400],
+      backgroundColor:['rgba(239,68,68,0.85)','rgba(239,68,68,0.75)','rgba(245,158,11,0.8)','rgba(245,158,11,0.7)','rgba(245,158,11,0.6)','rgba(14,165,233,0.65)','rgba(14,165,233,0.55)','rgba(14,165,233,0.45)','rgba(14,165,233,0.38)','rgba(14,165,233,0.3)'],
+      borderRadius:4,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x.toLocaleString()} t/yr`}}},
+    scales:{
+      x:{grid:{color:GRID},ticks:{color:'#5a8aaa',callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v}},
+      y:{grid:{display:false},ticks:{color:'#93c5fd',font:{size:10}}},
+    }
+  }
+});
+
+// ── Species impact ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('speciesChart'),{
+  type:'bar',
+  data:{
+    labels:['Albatross','Seabirds','Sea Turtles','Zooplankton','Marine Mammals','Whale Sharks','Pelagic Fish','Coral Reefs'],
+    datasets:[{
+      label:'% Affected',
+      data:[98,90,95,88,80,78,72,65],
+      backgroundColor:data=>{
+        const v=data.parsed?.y??data;
+        return v>=90?'rgba(239,68,68,0.85)':v>=75?'rgba(245,158,11,0.8)':'rgba(14,165,233,0.65)';
+      },
+      borderRadius:4,borderSkipped:false,
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x}% of studied population affected`}}},
+    scales:{
+      x:{min:0,max:100,grid:{color:GRID},ticks:{color:'#5a8aaa',callback:v=>v+'%'}},
+      y:{grid:{display:false},ticks:{color:'#93c5fd',font:{size:10}}},
+    }
+  }
+});
+
+// ── Cleanup quarterly ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('cleanupChart'),{
+  type:'bar',
+  data:{
+    labels:['Q1 2023','Q2 2023','Q3 2023','Q4 2023','Q1 2024','Q2 2024','Q3 2024','Q4 2024'],
+    datasets:[{
+      label:'kg Removed',
+      data:[45200,38600,52100,61300,74500,82200,91800,103400],
+      backgroundColor:['rgba(46,196,182,0.5)','rgba(46,196,182,0.55)','rgba(46,196,182,0.65)','rgba(46,196,182,0.72)','rgba(46,196,182,0.78)','rgba(46,196,182,0.84)','rgba(46,196,182,0.9)','rgba(46,196,182,1)'],
+      borderRadius:5,borderSkipped:false,
+    }]
+  },
+  options:{
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y.toLocaleString()} kg removed`}}
+    },
+    scales:{
+      y:{grid:{color:GRID},ticks:{color:'#5a8aaa',callback:v=>v>=1000?`${(v/1000).toFixed(0)}k`:v},title:{display:true,text:'kg Removed',color:'#5a8aaa',font:{size:10}}},
+      x:{grid:{display:false},ticks:{color:'#5a8aaa'}},
+    }
+  }
+});
+</script>
+</body>
+</html>

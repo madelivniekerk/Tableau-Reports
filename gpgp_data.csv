@@ -1,0 +1,50 @@
+data_type,label,value,unit,year,notes
+plastic_type,Ghost Gear / Fishing Nets,46,%,2023,By weight — single largest contributor
+plastic_type,Hard Plastic Fragments,20,%,2023,Bottles caps fishing crates buoys
+plastic_type,Plastic Film / Bags,17,%,2023,Packaging and agricultural film
+plastic_type,Foam / Polystyrene,10,%,2023,Expanded polystyrene food containers
+plastic_type,Microplastics (<5mm),4,%,2023,4% by weight but 94% by piece count
+plastic_type,Other Debris,3,%,2023,Rope line and mixed materials
+depth,Surface (0–0.5 m),42,%,2023,Visible layer — most studied
+depth,Subsurface (0.5–5 m),28,%,2023,Wind-driven submersion
+depth,Mid-water (5–30 m),18,%,2023,Neutral buoyancy zone
+depth,Deep water (30–200 m),9,%,2023,Sinking heavier fragments
+depth,Seafloor accumulation,3,%,2023,Plus significant uncharted micro accumulation
+growth,1945,0.1,million km²,1945,Pre-plastic era baseline
+growth,1960,0.2,million km²,1960,Post-war plastic boom begins
+growth,1970,0.4,million km²,1970,Estimated from model
+growth,1980,0.65,million km²,1980,Estimated from model
+growth,1990,0.95,million km²,1990,Estimated from model
+growth,2000,1.2,million km²,2000,Lebreton et al modelling
+growth,2010,1.42,million km²,2010,Lebreton et al 2018
+growth,2015,1.55,million km²,2015,Ocean Cleanup survey
+growth,2018,1.6,million km²,2018,Most-cited current estimate
+growth,2021,1.68,million km²,2021,Projected trend
+growth,2023,1.75,million km²,2023,Projected trend
+growth,2030,2.1,million km²,2030,Projection if no intervention
+river,Yangtze (China),330000,tonnes/year,2023,World's highest plastic-emitting river
+river,Indus (Pakistan/India),164000,tonnes/year,2023,
+river,Yellow River (China),124000,tonnes/year,2023,
+river,Hai River (China),91000,tonnes/year,2023,
+river,Nile (Egypt/Africa),84500,tonnes/year,2023,
+river,Ganges (India/Bangladesh),72800,tonnes/year,2023,
+river,Pearl River (China),52700,tonnes/year,2023,
+river,Amur (Russia/China),38500,tonnes/year,2023,
+river,Niger (West Africa),35000,tonnes/year,2023,
+river,Mekong (SE Asia),33400,tonnes/year,2023,
+species,Albatross,98,%affected,2023,Highest impact — feed plastic to chicks
+species,Sea Turtles,95,%affected,2023,100% of nesting females in North Pacific
+species,Zooplankton,88,%affected,2023,Microplastic in primary feeding zones
+species,Seabirds,90,%affected,2023,Ingestion + entanglement
+species,Whale Sharks,78,%affected,2023,Filter feeders in convergence zones
+species,Marine Mammals,80,%affected,2023,Entanglement + ingestion
+species,Pelagic Fish,72,%affected,2023,Pacific tuna mahi-mahi swordfish
+species,Coral Reefs,65,%affected,2023,Microplastic smothering + toxin transfer
+cleanup,Q1 2023,45200,kg removed,2023,System 002 — early operations
+cleanup,Q2 2023,38600,kg removed,2023,Weather downtime Q2
+cleanup,Q3 2023,52100,kg removed,2023,Peak summer deployment
+cleanup,Q4 2023,61300,kg removed,2023,System 003 partially deployed
+cleanup,Q1 2024,74500,kg removed,2024,System 003 fully operational
+cleanup,Q2 2024,82200,kg removed,2024,New interception barriers
+cleanup,Q3 2024,91800,kg removed,2024,Record quarter
+cleanup,Q4 2024,103400,kg removed,2024,Year-end record
