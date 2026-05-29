@@ -2175,49 +2175,56 @@ const qldSecondary = [  ['Brisbane Girls Grammar School','Brisbane ',243,647.6,6
   function renderTable(schools, bodyId, scoreRange, colspan) {
     const [minS, maxS] = scoreRange;
     const tbody = document.getElementById(bodyId);
-    if(!schools.length){ tbody.innerHTML=<tr><td colspan="{colspan}" class="no-results">No schools match the filters.</td></tr>; return; }
-    tbody.innerHTML = schools.slice(0, 100).map(s => {
+    if (!schools.length) {
+      tbody.innerHTML = '<tr><td colspan="' + colspan + '" class="no-results">No schools match the filters.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = schools.slice(0, 100).map(function(s) {
       const barW = Math.round((s.score - minS) / (maxS - minS) * 100);
-      return <tr>
-        <td class="rank-num">{s.rank}</td>
-        <td><strong>{s.name}</strong></td>
-        <td style="font-size:12px;color:#6a85a8;">{s.locality}</td>
-        <td>{sectorBadge(s.sector)}</td>
-        <td style="font-size:12px;color:#4a90e2;">{s.reading}</td>
-        <td style="font-size:12px;color:#e07b39;">{s.writing}</td>
-        <td style="font-size:12px;color:#2ec4b6;">{s.numeracy}</td>
-        <td><div class="score-bar-wrap"><div class="score-bar" style="width:{barW}px;"></div><span class="score-val">{s.score}</span></div></td>
-      </tr>;
+      return '<tr>' +
+        '<td class="rank-num">' + s.rank + '</td>' +
+        '<td><strong>' + s.name + '</strong></td>' +
+        '<td style="font-size:12px;color:#6a85a8;">' + s.locality + '</td>' +
+        '<td>' + sectorBadge(s.sector) + '</td>' +
+        '<td style="font-size:12px;color:#4a90e2;">' + s.reading + '</td>' +
+        '<td style="font-size:12px;color:#e07b39;">' + s.writing + '</td>' +
+        '<td style="font-size:12px;color:#2ec4b6;">' + s.numeracy + '</td>' +
+        '<td><div class="score-bar-wrap"><div class="score-bar" style="width:' + barW + 'px;"></div><span class="score-val">' + s.score + '</span></div></td>' +
+        '</tr>';
     }).join('');
   }
 
   function filterAndRender(schools, sectorId, searchId, bodyId, scoreRange) {
     const sc = document.getElementById(sectorId).value;
     const q  = document.getElementById(searchId).value.toLowerCase();
-    let filtered = schools.filter(s =>
-      (!sc || s.sector === sc) &&
-      (!q  || s.name.toLowerCase().includes(q) || s.locality.toLowerCase().includes(q))
-    );
-    // Re-rank after filter
-    filtered = filtered.map((s, i) => ({ ...s, rank: i + 1 }));
+    let filtered = schools.filter(function(s) {
+      return (!sc || s.sector === sc) &&
+             (!q  || s.name.toLowerCase().includes(q) || s.locality.toLowerCase().includes(q));
+    });
+    filtered = filtered.map(function(s, i) { return Object.assign({}, s, {rank: i + 1}); });
     renderTable(filtered, bodyId, scoreRange, 8);
   }
 
-  const pRange = [qldPrimary[qldPrimary.length-1][3], qldPrimary[0][3]];
-  const sRange = [qldSecondary[qldSecondary.length-1][3], qldSecondary[0][3]];
+  var pRange = [qldPrimary[qldPrimary.length - 1][3], qldPrimary[0][3]];
+  var sRange = [qldSecondary[qldSecondary.length - 1][3], qldSecondary[0][3]];
 
   renderTable(primarySchools, 'primaryBody', pRange, 8);
   renderTable(secondarySchools, 'secondaryBody', sRange, 8);
 
-  ['p-sector','p-search'].forEach(id =>
-    document.getElementById(id).addEventListener('input', () => filterAndRender(primarySchools,'p-sector','p-search','primaryBody',pRange))
-  );
-  ['s-sector','s-search'].forEach(id =>
-    document.getElementById(id).addEventListener('input', () => filterAndRender(secondarySchools,'s-sector','s-search','secondaryBody',sRange))
-  );
+  ['p-sector', 'p-search'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      filterAndRender(primarySchools, 'p-sector', 'p-search', 'primaryBody', pRange);
+    });
+  });
+  ['s-sector', 's-search'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      filterAndRender(secondarySchools, 's-sector', 's-search', 'secondaryBody', sRange);
+    });
+  });
 })();
 </script>
 </body>
 </html>
+
 
 
