@@ -2171,7 +2171,7 @@ const qldSecondary = [  ["Brisbane Girls Grammar School","Brisbane",243,647.6,65
 
   function sectorBadge(sector) {
     const cls = sector==='Government'?'badge-govt':sector==='Catholic'?'badge-cath':'badge-ind';
-    return <span class="badge-sector {cls}">{sector}</span>;
+    return '<span class="badge-sector ' + cls + '">' + sector + '</span>';
   }
 
   function renderTable(schools, bodyId, scoreRange, colspan) {
@@ -2227,6 +2227,8 @@ const qldSecondary = [  ["Brisbane Girls Grammar School","Brisbane",243,647.6,65
 </script>
 </body>
 </html>
+
+
 
 
 
