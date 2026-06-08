@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Sprint Resource Tracker — Engineering Team</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#070d1a;color:#e1e8f4;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#0c1628}
+::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:3px}
+
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:linear-gradient(135deg,#0c1628 0%,#0e1f40 100%);border-bottom:1px solid #1a2d4a;flex-wrap:wrap;gap:12px}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-icon{width:38px;height:38px;background:linear-gradient(135deg,#818cf8,#4f46e5);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 0 14px rgba(129,140,248,.3)}
+.hdr-title{font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#e1e8f4}
+.hdr-sub{font-size:11px;color:#4a6580;margin-top:2px;font-family:'Courier New',monospace;letter-spacing:.05em}
+.hdr-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hdr-badge{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a6580;background:#0c1e35;border:1px solid #1a2d4a;padding:4px 10px;border-radius:20px}
+.sprint-badge{font-size:10px;font-weight:700;color:#818cf8;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.3);padding:4px 12px;border-radius:20px}
+
+.incident{display:flex;align-items:center;gap:10px;padding:7px 28px;background:rgba(251,191,36,.05);border-bottom:1px solid rgba(251,191,36,.15);font-size:12px;color:#fbbf24;flex-wrap:wrap}
+.incident-dot{width:7px;height:7px;border-radius:50%;background:#fbbf24;animation:pulse 1.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 28px 0}
+.kpi{background:#0c1628;border:1px solid #1a2d4a;border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.kpi:hover{border-color:#818cf8;box-shadow:0 0 18px rgba(129,140,248,.08)}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:12px 0 0 12px}
+.kpi.vi::before{background:#818cf8}.kpi.tl::before{background:#10d9a0}.kpi.co::before{background:#f87171}.kpi.am::before{background:#fbbf24}
+.kpi-lbl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4a6580;margin-bottom:8px}
+.kpi-val{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.kpi.vi .kpi-val{color:#818cf8}.kpi.tl .kpi-val{color:#10d9a0}.kpi.co .kpi-val{color:#f87171}.kpi.am .kpi-val{color:#fbbf24}
+.kpi-sub{font-size:11px;color:#4a6580;margin-top:5px}
+
+.filters{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid #1a2d4a;flex-wrap:wrap}
+.f-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a6580;margin-right:4px}
+select.fsel{background:#0c1e35;color:#e1e8f4;border:1px solid #1a2d4a;border-radius:20px;padding:5px 28px 5px 12px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath fill='%234a6580' d='M0 0l4.5 5L9 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .15s}
+select.fsel:hover{border-color:#818cf8}
+.f-sep{color:#1a2d4a}
+.f-reset{background:none;border:1px solid #1a2d4a;color:#4a6580;padding:5px 14px;border-radius:20px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s;margin-left:auto}
+.f-reset:hover{border-color:#818cf8;color:#818cf8}
+.f-count{font-size:11px;color:#4a6580;font-family:'Courier New',monospace}
+
+.proj-legend{display:flex;align-items:center;gap:14px;padding:0 28px 12px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#4a6580}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+.main{display:grid;grid-template-columns:1fr 310px;gap:16px;padding:12px 28px 24px;align-items:start}
+.gantt-panel{background:#0c1628;border:1px solid #1a2d4a;border-radius:12px;overflow:hidden}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid #1a2d4a;background:#0a1422}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a6580}
+.gantt-scroll{overflow-x:auto}
+
+.side{display:flex;flex-direction:column;gap:14px}
+.side-card{background:#0c1628;border:1px solid #1a2d4a;border-radius:12px;overflow:hidden}
+
+.risk-scroll{overflow-y:auto;max-height:260px}
+.r-item{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid #0f1e30;cursor:default;transition:background .12s}
+.r-item:last-child{border-bottom:none}
+.r-item:hover{background:#0f1e30}
+.r-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.r-id{font-size:10px;font-family:'Courier New',monospace;font-weight:700;width:36px;flex-shrink:0}
+.r-who{font-size:10px;font-weight:700;width:52px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-name{font-size:11px;color:#8facc4;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-pts{font-size:11px;font-weight:800;font-family:'Courier New',monospace;flex-shrink:0}
+.r-tag{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:20px;flex-shrink:0}
+
+#tt{position:fixed;background:#0e1e33;border:1px solid #1e3a5f;border-radius:10px;padding:12px 14px;font-size:12px;pointer-events:none;z-index:1000;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.7);display:none}
+.tt-title{font-size:13px;font-weight:700;color:#e1e8f4;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #1e3a5f}
+.tt-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:3px}
+.tt-key{color:#4a6580;font-size:11px}
+.tt-val{font-weight:600;color:#e1e8f4;font-family:'Courier New',monospace;font-size:11px}
+.tt-chip{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:99px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-icon">⚡</div>
+    <div>
+      <div class="hdr-title">Sprint Resource Tracker — Engineering Team</div>
+      <div class="hdr-sub">SPRINT 23 · JUN 1–12, 2026 · 8 MEMBERS · 38 TASKS</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="sprint-badge">Day 6 of 10</div>
+    <div class="hdr-badge">4 Active Projects</div>
+    <div class="hdr-badge" id="clock">⬤ 08 Jun 14:00</div>
+  </div>
+</div>
+
+<div class="incident">
+  <div class="incident-dot"></div>
+  <strong>CAPACITY ALERT:</strong>&nbsp;Alex K. allocated 142% this sprint (3 concurrent projects) — Sam T. blocked on Priya's API Docs since Jun 5 — Payment Gateway delivery at risk.
+</div>
+
+<div class="kpi-row">
+  <div class="kpi vi">
+    <div class="kpi-lbl">Sprint Velocity</div>
+    <div class="kpi-val">58%</div>
+    <div class="kpi-sub">of points completed (day 6/10)</div>
+  </div>
+  <div class="kpi co">
+    <div class="kpi-lbl">Blocked Points</div>
+    <div class="kpi-val">13</div>
+    <div class="kpi-sub">Sam T. — awaiting API docs</div>
+  </div>
+  <div class="kpi am">
+    <div class="kpi-lbl">Overloaded Members</div>
+    <div class="kpi-val">2</div>
+    <div class="kpi-sub">Alex K. 142% · Priya S. 98%</div>
+  </div>
+  <div class="kpi tl">
+    <div class="kpi-lbl">Ahead of Schedule</div>
+    <div class="kpi-val">+2.5d</div>
+    <div class="kpi-sub">Jordan M. — star performer</div>
+  </div>
+</div>
+
+<div style="padding:14px 28px 0">
+  <div class="proj-legend">
+    <span style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a6580;margin-right:4px">Projects:</span>
+    <div class="leg-item"><div class="leg-sq" style="background:#818cf8"></div>Customer Portal</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#10d9a0"></div>Payment Gateway</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#fb923c"></div>Mobile App v2</div>
+    <div class="leg-item"><div class="leg-sq" style="background:#c084fc"></div>Data Pipeline</div>
+    <span style="margin-left:16px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4a6580;margin-right:4px">Style:</span>
+    <div class="leg-item"><div class="leg-sq" style="background:#818cf8;opacity:.85"></div>Completed</div>
+    <div class="leg-item"><div style="width:10px;height:10px;border:1px dashed #4a6580;border-radius:2px"></div>Planned outline</div>
+    <div class="leg-item"><div class="leg-sq" style="background:repeating-linear-gradient(45deg,#f87171,#f87171 2px,transparent 2px,transparent 6px)"></div>Blocked</div>
+    <div class="leg-item"><div class="leg-sq" style="background:repeating-linear-gradient(45deg,#fbbf24,#fbbf24 2px,transparent 2px,transparent 6px)"></div>At Risk</div>
+  </div>
+</div>
+
+<div class="filters">
+  <span class="f-lbl">Filter:</span>
+  <select class="fsel" id="f-person"><option value="">All People</option></select>
+  <span class="f-sep">|</span>
+  <select class="fsel" id="f-proj">
+    <option value="">All Projects</option>
+    <option value="PORTAL">Customer Portal</option>
+    <option value="PAYMENT">Payment Gateway</option>
+    <option value="MOBILE">Mobile App v2</option>
+    <option value="DATA">Data Pipeline</option>
+  </select>
+  <span class="f-sep">|</span>
+  <select class="fsel" id="f-status">
+    <option value="">All Statuses</option>
+    <option value="completed">Completed</option>
+    <option value="in_progress">In Progress</option>
+    <option value="blocked">Blocked</option>
+    <option value="at_risk">At Risk</option>
+    <option value="scheduled">Scheduled</option>
+  </select>
+  <span class="f-count" id="f-count"></span>
+  <button class="f-reset" onclick="resetFilters()">Reset</button>
+</div>
+
+<div class="main">
+  <div class="gantt-panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Task Timeline — Planned vs Actual · Sprint 23</span>
+    </div>
+    <div class="gantt-scroll"><svg id="gantt-svg" style="display:block"></svg></div>
+  </div>
+  <div class="side">
+    <div class="side-card">
+      <div class="panel-hdr"><span class="panel-title">Sprint Burndown</span></div>
+      <div style="padding:14px 14px 10px"><svg id="bd-svg" style="display:block;width:100%"></svg></div>
+    </div>
+    <div class="side-card">
+      <div class="panel-hdr"><span class="panel-title">⚠ Blocked &amp; At Risk</span></div>
+      <div class="risk-scroll" id="risk-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="tt"><div class="tt-title" id="tt-title"></div><div id="tt-body"></div></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const PEOPLE = [
+  {id:'ALEX-K',   name:'Alex K.',   role:'Senior Full Stack', color:'#818cf8', cap:142, primary:'PAYMENT'},
+  {id:'JORDAN-M', name:'Jordan M.', role:'UX Designer',       color:'#10d9a0', cap:78,  primary:'PORTAL'},
+  {id:'SAM-T',    name:'Sam T.',    role:'Junior Developer',  color:'#fb923c', cap:65,  primary:'PAYMENT'},
+  {id:'PRIYA-S',  name:'Priya S.',  role:'Backend Engineer',  color:'#f87171', cap:98,  primary:'PAYMENT'},
+  {id:'CHRIS-W',  name:'Chris W.',  role:'QA Engineer',       color:'#c084fc', cap:88,  primary:'PORTAL'},
+  {id:'TOM-H',    name:'Tom H.',    role:'DevOps Engineer',   color:'#38bdf8', cap:82,  primary:'PORTAL'},
+  {id:'MAYA-L',   name:'Maya L.',   role:'Data Analyst',      color:'#a3e635', cap:75,  primary:'DATA'},
+  {id:'LISA-F',   name:'Lisa F.',   role:'Frontend Dev',      color:'#f0abfc', cap:85,  primary:'PORTAL'}
+];
+
+const PROJ_COLOR = {PORTAL:'#818cf8', PAYMENT:'#10d9a0', MOBILE:'#fb923c', DATA:'#c084fc', ADMIN:'#2a3f5a'};
+
+const TASKS = [
+  // Alex K.
+  {id:'T001',name:'Auth Module',       person:'ALEX-K',  proj:'PAYMENT',pts:8,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T09:00',ae:'2026-06-05T12:00',fe:null,blocked:false,notes:'Completed 0.5d late — more complex than scoped'},
+  {id:'T002',name:'Backend API Review',person:'ALEX-K',  proj:'PORTAL', pts:3,pri:'MEDIUM',
+   ps:'2026-06-01T09:00',pe:'2026-06-02T13:00',as:'2026-06-01T09:00',ae:'2026-06-02T11:00',fe:null,blocked:false,notes:'Completed 2h early'},
+  {id:'T003',name:'Webhook Handler',   person:'ALEX-K',  proj:'PAYMENT',pts:8,pri:'HIGH',
+   ps:'2026-06-05T09:00',pe:'2026-06-09T17:00',as:'2026-06-05T09:00',ae:null,fe:'2026-06-10T12:00',blocked:false,notes:'In progress — forecast 1.5d late (overloaded)'},
+  {id:'T004',name:'Mobile Code Review',person:'ALEX-K',  proj:'MOBILE', pts:3,pri:'LOW',
+   ps:'2026-06-10T09:00',pe:'2026-06-11T13:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled — may be deprioritised'},
+  {id:'T005',name:'Security Audit',   person:'ALEX-K',  proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-11T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'},
+  // Jordan M.
+  {id:'T006',name:'UX Research',       person:'JORDAN-M',proj:'PORTAL', pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-03T17:00',as:'2026-06-01T09:00',ae:'2026-06-02T17:00',fe:null,blocked:false,notes:'Completed 1d early — leveraged existing research'},
+  {id:'T007',name:'Wireframes v2',     person:'JORDAN-M',proj:'PORTAL', pts:8,pri:'HIGH',
+   ps:'2026-06-03T09:00',pe:'2026-06-05T17:00',as:'2026-06-02T17:00',ae:'2026-06-04T14:00',fe:null,blocked:false,notes:'Completed 1.5d early — unblocked Alex and Lisa'},
+  {id:'T008',name:'Icon Set',          person:'JORDAN-M',proj:'MOBILE', pts:3,pri:'MEDIUM',
+   ps:'2026-06-05T09:00',pe:'2026-06-06T17:00',as:'2026-06-04T14:00',ae:'2026-06-05T12:00',fe:null,blocked:false,notes:'Completed early — pulled from backlog'},
+  {id:'T009',name:'Component Library', person:'JORDAN-M',proj:'PORTAL', pts:8,pri:'HIGH',
+   ps:'2026-06-08T09:00',pe:'2026-06-11T17:00',as:'2026-06-05T12:00',ae:null,fe:'2026-06-10T09:00',blocked:false,notes:'In progress — tracking 1d ahead of plan'},
+  {id:'T010',name:'Onboarding Flow',   person:'JORDAN-M',proj:'MOBILE', pts:5,pri:'MEDIUM',
+   ps:'2026-06-11T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:'2026-06-11T09:00',blocked:false,notes:'Likely to start early given Jordan\'s pace'},
+  // Sam T.
+  {id:'T011',name:'Frontend Forms',    person:'SAM-T',   proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T09:00',ae:'2026-06-05T12:00',fe:null,blocked:false,notes:'Completed 0.5d late'},
+  {id:'T012',name:'API Integration',   person:'SAM-T',   proj:'PAYMENT',pts:8,pri:'HIGH',
+   ps:'2026-06-05T09:00',pe:'2026-06-09T17:00',as:'2026-06-05T09:00',ae:null,fe:'2026-06-12T17:00',blocked:true, notes:'BLOCKED — waiting on Priya\'s API Docs (T016). 3+ days stalled.'},
+  {id:'T013',name:'Component Dev',     person:'SAM-T',   proj:'PORTAL', pts:5,pri:'MEDIUM',
+   ps:'2026-06-10T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:'2026-06-12T17:00',blocked:false,notes:'At risk — depends on T012 completing first'},
+  // Priya S.
+  {id:'T014',name:'Database Schema',   person:'PRIYA-S', proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-03T17:00',as:'2026-06-01T09:00',ae:'2026-06-04T12:00',fe:null,blocked:false,notes:'Completed 0.5d late — schema refactor required'},
+  {id:'T015',name:'API Endpoints',     person:'PRIYA-S', proj:'PAYMENT',pts:8,pri:'HIGH',
+   ps:'2026-06-04T09:00',pe:'2026-06-06T17:00',as:'2026-06-04T12:00',ae:'2026-06-09T09:00',fe:null,blocked:false,notes:'Completed 2.5d late — complexity underestimated'},
+  {id:'T016',name:'API Documentation', person:'PRIYA-S', proj:'PAYMENT',pts:3,pri:'HIGH',
+   ps:'2026-06-09T09:00',pe:'2026-06-10T17:00',as:null,ae:null,fe:'2026-06-10T17:00',blocked:false,notes:'Not started — this is blocking Sam T. on T012'},
+  {id:'T017',name:'ETL Review',        person:'PRIYA-S', proj:'DATA',   pts:5,pri:'MEDIUM',
+   ps:'2026-06-10T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:'2026-06-12T17:00',blocked:false,notes:'At risk — may slip to next sprint'},
+  {id:'T018',name:'Load Testing',      person:'PRIYA-S', proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-11T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'},
+  // Chris W.
+  {id:'T019',name:'Regression Suite',  person:'CHRIS-W', proj:'PORTAL', pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T09:00',ae:'2026-06-04T17:00',fe:null,blocked:false,notes:'Completed on time'},
+  {id:'T020',name:'Payment Test Cases',person:'CHRIS-W', proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-04T09:00',pe:'2026-06-06T17:00',as:'2026-06-04T17:00',ae:'2026-06-07T17:00',fe:null,blocked:false,notes:'Completed 1d late — waited on dev code freeze'},
+  {id:'T021',name:'UAT Prep',          person:'CHRIS-W', proj:'PORTAL', pts:3,pri:'MEDIUM',
+   ps:'2026-06-08T09:00',pe:'2026-06-09T17:00',as:'2026-06-08T09:00',ae:null,fe:'2026-06-09T12:00',blocked:false,notes:'In progress — on track'},
+  {id:'T022',name:'Mobile Smoke Tests',person:'CHRIS-W', proj:'MOBILE', pts:3,pri:'MEDIUM',
+   ps:'2026-06-10T09:00',pe:'2026-06-11T13:00',as:null,ae:null,fe:'2026-06-11T17:00',blocked:false,notes:'At risk — testing window compressed by upstream delays'},
+  {id:'T023',name:'Integration Tests', person:'CHRIS-W', proj:'PAYMENT',pts:8,pri:'HIGH',
+   ps:'2026-06-10T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:'2026-06-12T17:00',blocked:false,notes:'At risk — depends on Sam T. unblocking'},
+  // Tom H.
+  {id:'T024',name:'CI/CD Pipeline',    person:'TOM-H',   proj:'PORTAL', pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T09:00',ae:'2026-06-04T12:00',fe:null,blocked:false,notes:'Completed 5h early'},
+  {id:'T025',name:'Staging Deploy',    person:'TOM-H',   proj:'PAYMENT',pts:5,pri:'HIGH',
+   ps:'2026-06-05T09:00',pe:'2026-06-06T17:00',as:'2026-06-05T09:00',ae:'2026-06-06T17:00',fe:null,blocked:false,notes:'Completed on time'},
+  {id:'T026',name:'Data Infrastructure',person:'TOM-H', proj:'DATA',   pts:5,pri:'MEDIUM',
+   ps:'2026-06-08T09:00',pe:'2026-06-09T17:00',as:'2026-06-08T09:00',ae:null,fe:'2026-06-09T17:00',blocked:false,notes:'In progress — on track'},
+  {id:'T027',name:'Mobile Build Pipeline',person:'TOM-H',proj:'MOBILE',pts:5,pri:'MEDIUM',
+   ps:'2026-06-10T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'},
+  {id:'T028',name:'Prod Deploy Prep',  person:'TOM-H',   proj:'PORTAL', pts:3,pri:'HIGH',
+   ps:'2026-06-12T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'},
+  // Maya L.
+  {id:'T029',name:'Requirements',      person:'MAYA-L',  proj:'DATA',   pts:3,pri:'MEDIUM',
+   ps:'2026-06-01T09:00',pe:'2026-06-02T17:00',as:'2026-06-01T09:00',ae:'2026-06-01T17:00',fe:null,blocked:false,notes:'Completed 1d early — very clear stakeholder brief'},
+  {id:'T030',name:'Data Mapping',      person:'MAYA-L',  proj:'DATA',   pts:5,pri:'MEDIUM',
+   ps:'2026-06-02T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T17:00',ae:'2026-06-03T17:00',fe:null,blocked:false,notes:'Completed early — mapping simpler than estimated'},
+  {id:'T031',name:'Validation Rules',  person:'MAYA-L',  proj:'DATA',   pts:5,pri:'MEDIUM',
+   ps:'2026-06-04T09:00',pe:'2026-06-06T17:00',as:'2026-06-03T17:00',ae:'2026-06-05T17:00',fe:null,blocked:false,notes:'Completed early — reused existing logic'},
+  {id:'T032',name:'Dashboard Mockups', person:'MAYA-L',  proj:'DATA',   pts:5,pri:'MEDIUM',
+   ps:'2026-06-08T09:00',pe:'2026-06-10T17:00',as:'2026-06-05T17:00',ae:null,fe:'2026-06-08T17:00',blocked:false,notes:'In progress — will finish today ahead of schedule'},
+  {id:'T033',name:'Stakeholder Review',person:'MAYA-L',  proj:'DATA',   pts:3,pri:'MEDIUM',
+   ps:'2026-06-10T09:00',pe:'2026-06-11T17:00',as:null,ae:null,fe:'2026-06-10T09:00',blocked:false,notes:'Expected to start early given Maya\'s pace'},
+  // Lisa F.
+  {id:'T034',name:'Landing Page',      person:'LISA-F',  proj:'PORTAL', pts:5,pri:'HIGH',
+   ps:'2026-06-01T09:00',pe:'2026-06-04T17:00',as:'2026-06-01T09:00',ae:'2026-06-05T09:00',fe:null,blocked:false,notes:'Completed 0.5d late'},
+  {id:'T035',name:'Dashboard Components',person:'LISA-F',proj:'PORTAL', pts:8,pri:'HIGH',
+   ps:'2026-06-04T09:00',pe:'2026-06-08T17:00',as:'2026-06-05T09:00',ae:'2026-06-08T17:00',fe:null,blocked:false,notes:'Started 1d late but finished on time — extra hours put in'},
+  {id:'T036',name:'Responsive Design', person:'LISA-F',  proj:'PORTAL', pts:5,pri:'HIGH',
+   ps:'2026-06-08T09:00',pe:'2026-06-11T17:00',as:'2026-06-08T17:00',ae:null,fe:'2026-06-11T17:00',blocked:false,notes:'In progress — slightly delayed start'},
+  {id:'T037',name:'PWA Setup',         person:'LISA-F',  proj:'MOBILE', pts:3,pri:'MEDIUM',
+   ps:'2026-06-11T09:00',pe:'2026-06-12T09:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'},
+  {id:'T038',name:'Accessibility Audit',person:'LISA-F', proj:'PORTAL', pts:3,pri:'MEDIUM',
+   ps:'2026-06-12T09:00',pe:'2026-06-12T17:00',as:null,ae:null,fe:null,blocked:false,notes:'Scheduled'}
+];
+
+// Sprint burndown data (story points remaining at end of each working day)
+const BURNDOWN = {
+  total: 89,
+  labels: ['Start','D1','D2','D3','D4','D5','D6','D7','D8','D9','D10'],
+  dates:  ['','1 Jun','2 Jun','3 Jun','4 Jun','5 Jun','8 Jun','9 Jun','10 Jun','11 Jun','12 Jun'],
+  ideal:   [89, 80.1, 71.2, 62.3, 53.4, 44.5, 35.6, 26.7, 17.8, 8.9, 0],
+  actual:  [89, 74,   59,   47,   37,   31,   27.5, null, null, null, null],
+  forecast:[null,null,null,null,null,null,27.5, 22,  17,   13,  11]
+};
+
+const CHART_START = new Date('2026-06-01T00:00:00');
+const CHART_END   = new Date('2026-06-13T00:00:00');
+const NOW         = new Date('2026-06-08T14:00:00');
+
+// ── STATUS LOGIC ─────────────────────────────────────────────────────────────
+function getStatus(t) {
+  const pe = new Date(t.pe), ps = new Date(t.ps);
+  if (t.ae) {
+    const d = (new Date(t.ae) - pe) / 3600000;
+    return d < -2 ? 'completed_ahead' : d <= 2 ? 'completed_ontime' : 'completed_late';
+  }
+  if (t.as) {
+    if (t.blocked) return 'blocked';
+    const fe = new Date(t.fe || t.pe);
+    const d = (fe - pe) / 3600000;
+    return d < -2 ? 'in_progress_ahead' : d <= 2 ? 'in_progress' : 'in_progress_late';
+  }
+  if (ps < NOW) return 'not_started';
+  if (t.fe && new Date(t.fe) > pe) return 'at_risk';
+  return 'scheduled';
+}
+
+const SC = {
+  completed_ahead:  {text:'#10d9a0', label:'Ahead',        tag_bg:'rgba(16,217,160,.12)'},
+  completed_ontime: {text:'#10d9a0', label:'On Time',      tag_bg:'rgba(16,217,160,.10)'},
+  completed_late:   {text:'#fb923c', label:'Late',         tag_bg:'rgba(251,146,60,.13)'},
+  in_progress:      {text:'#818cf8', label:'In Progress',  tag_bg:'rgba(129,140,248,.13)'},
+  in_progress_ahead:{text:'#10d9a0', label:'Running Ahead',tag_bg:'rgba(16,217,160,.12)'},
+  in_progress_late: {text:'#fb923c', label:'Running Late', tag_bg:'rgba(251,146,60,.13)'},
+  blocked:          {text:'#f87171', label:'Blocked',      tag_bg:'rgba(248,113,113,.15)'},
+  not_started:      {text:'#f87171', label:'Not Started',  tag_bg:'rgba(248,113,113,.13)'},
+  at_risk:          {text:'#fbbf24', label:'At Risk',      tag_bg:'rgba(251,191,36,.12)'},
+  scheduled:        {text:'#2a5a7a', label:'Scheduled',    tag_bg:'rgba(42,90,122,.12)'}
+};
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+let filters = {person:'', proj:'', status:''};
+
+function filteredTasks() {
+  return TASKS.filter(t => {
+    if (filters.person && t.person !== filters.person) return false;
+    if (filters.proj   && t.proj   !== filters.proj)   return false;
+    if (filters.status) {
+      const st = getStatus(t);
+      const base = st.replace('completed_ahead','completed').replace('completed_ontime','completed')
+                    .replace('completed_late','completed').replace('in_progress_ahead','in_progress')
+                    .replace('in_progress_late','in_progress');
+      if (base !== filters.status && st !== filters.status) return false;
+    }
+    return true;
+  });
+}
+
+// ── SVG HELPERS ───────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs, txt) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (txt !== undefined) e.textContent = txt;
+  return e;
+}
+
+// ── GANTT ─────────────────────────────────────────────────────────────────────
+function renderGantt(tasks) {
+  const svg = document.getElementById('gantt-svg');
+  svg.innerHTML = '';
+  const defs = svgEl('defs',{});
+
+  // SVG patterns
+  const mkPattern = (id, col) => {
+    const p = svgEl('pattern', {id, width:'8', height:'8', patternUnits:'userSpaceOnUse', patternTransform:'rotate(45)'});
+    p.appendChild(svgEl('rect', {width:'4', height:'8', fill:col, opacity:'0.55'}));
+    defs.appendChild(p);
+  };
+  mkPattern('p-blocked','#f87171');
+  mkPattern('p-atrisk','#fbbf24');
+  svg.appendChild(defs);
+
+  const LW = 128, PAD = 12, HH = 46, RH = 86, BH = 20, PBH = 24;
+  const DAYS = 12;
+  const containerW = svg.parentElement.clientWidth || 900;
+  const CW = Math.max(containerW - LW - PAD, DAYS * 62);
+  const totalW = LW + CW + PAD;
+  const totalH = PEOPLE.length * RH + HH + 6;
+  const totalMs = CHART_END - CHART_START;
+
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+
+  function tx(d) { return LW + ((new Date(d) - CHART_START) / totalMs) * CW; }
+  function ty(i) { return HH + i * RH; }
+
+  svg.appendChild(svgEl('rect', {x:0, y:0, width:totalW, height:totalH, fill:'#070d1a'}));
+
+  // Day columns
+  for (let d = 0; d < DAYS; d++) {
+    const date = new Date(CHART_START); date.setDate(date.getDate() + d);
+    const x = tx(date);
+    const dayW = CW / DAYS;
+    const dow = date.getDay();
+    if (dow === 0 || dow === 6) {
+      svg.appendChild(svgEl('rect', {x, y:HH, width:dayW, height:PEOPLE.length*RH, fill:'rgba(129,140,248,.04)'}));
+    }
+    svg.appendChild(svgEl('line', {x1:x, y1:HH-6, x2:x, y2:totalH-2,
+      stroke: dow===1?'#1a2d4a':'#0e1e30', 'stroke-width': dow===1?1:0.5}));
+    const dlbl = svgEl('text', {x:x+dayW/2, y:18, fill:'#4a6580', 'font-size':9,
+      'font-family':'Courier New,monospace', 'text-anchor':'middle'});
+    dlbl.textContent = date.toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+    svg.appendChild(dlbl);
+    const dwlbl = svgEl('text', {x:x+dayW/2, y:32, fill:'#2a4a6a', 'font-size':8,
+      'font-family':'Courier New,monospace', 'text-anchor':'middle'});
+    dwlbl.textContent = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+    svg.appendChild(dwlbl);
+  }
+  svg.appendChild(svgEl('line', {x1:LW, y1:HH, x2:totalW-PAD, y2:HH, stroke:'#1a2d4a', 'stroke-width':1}));
+
+  // NOW line
+  const nx = tx(NOW);
+  svg.appendChild(svgEl('line', {x1:nx, y1:HH-6, x2:nx, y2:totalH-2,
+    stroke:'#f87171', 'stroke-width':1.5, 'stroke-dasharray':'5,3'}));
+  svg.appendChild(svgEl('text', {x:nx, y:HH-9, fill:'#f87171', 'font-size':8,
+    'font-family':'Courier New,monospace', 'text-anchor':'middle', 'font-weight':'bold'}, 'NOW'));
+
+  // Person rows
+  PEOPLE.forEach((person, pi) => {
+    const ry = ty(pi);
+    const active = !filters.person || filters.person === person.id;
+    svg.appendChild(svgEl('rect', {x:0, y:ry, width:totalW, height:RH,
+      fill: pi%2===0 ? '#0c1830':'#070d1a'}));
+
+    // Capacity badge color
+    const capCol = person.cap > 100 ? '#f87171' : person.cap > 90 ? '#fbbf24' : '#10d9a0';
+
+    // Person label
+    svg.appendChild(svgEl('rect', {x:3, y:ry+RH/2-16, width:3, height:32,
+      fill: active ? person.color : '#333', rx:2}));
+    svg.appendChild(svgEl('text', {x:12, y:ry+16, fill: active ? person.color : '#2a4a6a',
+      'font-size':11, 'font-family':'Courier New,monospace', 'font-weight':'bold'}, person.name));
+    svg.appendChild(svgEl('text', {x:12, y:ry+30, fill:'#2a4a6a',
+      'font-size':9, 'font-family':'-apple-system,sans-serif'}, person.role));
+    // Capacity badge
+    svg.appendChild(svgEl('rect', {x:10, y:ry+36, width:52, height:13,
+      fill:`${capCol}22`, rx:3, stroke:capCol, 'stroke-width':'0.5'}));
+    svg.appendChild(svgEl('text', {x:36, y:ry+46, fill:capCol,
+      'font-size':8, 'font-family':'Courier New,monospace', 'font-weight':'bold',
+      'text-anchor':'middle'}, person.cap + '% cap'));
+
+    svg.appendChild(svgEl('line', {x1:0, y1:ry+RH, x2:totalW, y2:ry+RH,
+      stroke:'#111e30', 'stroke-width':1}));
+
+    // Tasks for this person (2 lanes: primary project top, others bottom)
+    const pTasks = tasks.filter(t => t.person === person.id);
+    pTasks.forEach(task => {
+      const lane = task.proj === person.primary ? 0 : 1;
+      const LANE_Y = [ry + 4, ry + 47];
+      const layY = LANE_Y[lane];
+      const status = getStatus(task);
+      const projCol = PROJ_COLOR[task.proj] || '#818cf8';
+
+      const px1 = tx(task.ps), px2 = tx(task.pe), pw = Math.max(px2 - px1, 2);
+
+      // Planned outline
+      svg.appendChild(svgEl('rect', {x:px1, y:layY, width:pw, height:PBH,
+        fill:'transparent', stroke:projCol, 'stroke-width':1,
+        'stroke-dasharray':'4,2', rx:3, opacity:0.3}));
+
+      let ax1, ax2;
+      if (task.as) {
+        ax1 = tx(task.as);
+        ax2 = task.ae ? tx(task.ae) : tx(task.fe || NOW);
+      } else {
+        ax1 = tx(task.ps); ax2 = tx(task.fe || task.pe);
+      }
+      const aw = Math.max(ax2 - ax1, 2);
+      const barY = layY + (PBH - BH) / 2;
+
+      if (status === 'blocked') {
+        // Actual worked portion (solid)
+        const workedW = Math.max(tx(NOW) - ax1, 2);
+        svg.appendChild(svgEl('rect', {x:ax1, y:barY, width:workedW, height:BH,
+          fill:projCol, rx:3, opacity:0.8}));
+        // Blocked hatch over remaining planned period
+        const remX = tx(NOW), remW = Math.max(px2 - tx(NOW), 0);
+        if (remW > 0) {
+          svg.appendChild(svgEl('rect', {x:remX, y:barY, width:remW, height:BH,
+            fill:'url(#p-blocked)', rx:0, stroke:'#f87171', 'stroke-width':1, opacity:0.9}));
+        }
+      } else if (status === 'at_risk' || status === 'not_started') {
+        svg.appendChild(svgEl('rect', {x:ax1, y:barY, width:aw, height:BH,
+          fill:`url(#p-atrisk)`, rx:3, stroke:'#fbbf24', 'stroke-width':0.8, opacity:0.7}));
+      } else if (status === 'scheduled') {
+        svg.appendChild(svgEl('rect', {x:ax1, y:barY, width:aw, height:BH,
+          fill:projCol, rx:3, opacity:0.2}));
+      } else if (status === 'in_progress' || status === 'in_progress_ahead' || status === 'in_progress_late') {
+        // Worked portion
+        const progW = Math.max(Math.min(tx(NOW), ax2) - ax1, 0);
+        if (progW > 0) svg.appendChild(svgEl('rect', {x:ax1, y:barY, width:progW, height:BH,
+          fill:projCol, rx:3, opacity:0.85}));
+        // Forecast portion
+        const fcX = tx(NOW), fcW = ax2 - fcX;
+        if (fcW > 0) svg.appendChild(svgEl('rect', {x:fcX, y:barY, width:fcW, height:BH,
+          fill:projCol, rx:3, opacity:0.25, stroke:projCol, 'stroke-width':1, 'stroke-dasharray':'3,2'}));
+      } else {
+        // Completed
+        svg.appendChild(svgEl('rect', {x:ax1, y:barY, width:aw, height:BH,
+          fill:projCol, rx:3, opacity:0.82}));
+        // Ahead indicator
+        if (status === 'completed_ahead' && ax2 < px2) {
+          svg.appendChild(svgEl('text', {x:ax2+3, y:barY+BH/2+4, fill:'#10d9a0', 'font-size':8}, '▲'));
+        }
+        // Late overrun indicator
+        if (status === 'completed_late' && ax2 > px2) {
+          const overW = ax2 - px2;
+          svg.appendChild(svgEl('rect', {x:px2, y:barY, width:overW, height:BH,
+            fill:'#fb923c', rx:0, opacity:0.5}));
+        }
+      }
+
+      // Task label in bar
+      if (aw > 38) {
+        const cid = 'cl' + task.id;
+        const cp = svgEl('clipPath', {id:cid});
+        cp.appendChild(svgEl('rect', {x:ax1+2, y:barY, width:aw-4, height:BH}));
+        defs.appendChild(cp);
+        svg.appendChild(svgEl('text', {x:ax1+5, y:barY+BH/2+3.5, fill:'#f0f6fc',
+          'font-size':8.5, 'font-family':'Courier New,monospace', 'font-weight':'bold',
+          'clip-path':`url(#${cid})`, opacity:0.9}, task.id));
+      }
+
+      // Hover target
+      const hx = Math.min(px1,ax1)-3, hw = Math.max(px2,ax2)+3 - hx;
+      const hz = svgEl('rect', {x:hx, y:layY, width:Math.max(hw,10), height:PBH,
+        fill:'transparent', cursor:'pointer'});
+      hz.addEventListener('mouseenter', e => showTT(e, task, status));
+      hz.addEventListener('mousemove', moveTT);
+      hz.addEventListener('mouseleave', hideTT);
+      svg.appendChild(hz);
+    });
+  });
+
+  svg.appendChild(svgEl('line', {x1:LW, y1:0, x2:LW, y2:totalH, stroke:'#1a2d4a', 'stroke-width':1}));
+}
+
+// ── BURNDOWN ──────────────────────────────────────────────────────────────────
+function renderBurndown() {
+  const container = document.getElementById('bd-svg');
+  const CW = container.parentElement.clientWidth - 28;
+  const CH = 185, ML = 36, MB = 28, MT = 10, MR = 8;
+  const PW = CW - ML - MR, PH = CH - MB - MT;
+  const total = BURNDOWN.total, n = 10;
+
+  container.setAttribute('viewBox', `0 0 ${CW} ${CH}`);
+  container.setAttribute('height', CH);
+  container.innerHTML = '';
+
+  function bx(day) { return ML + (day / n) * PW; }
+  function by(pts)  { return MT + PH - (pts / total) * PH; }
+
+  // Grid
+  [0,25,50,75,89].forEach(v => {
+    const y = by(v);
+    container.appendChild(svgEl('line', {x1:ML, y1:y, x2:ML+PW, y2:y,
+      stroke:'#0f1e30', 'stroke-width':1}));
+    container.appendChild(svgEl('text', {x:ML-4, y:y+3.5, fill:'#2a4a6a', 'font-size':8,
+      'font-family':'Courier New,monospace', 'text-anchor':'end'}, v));
+  });
+
+  // X axis labels (working days only)
+  [0,1,2,3,4,5,6,7,8,9,10].forEach(d => {
+    container.appendChild(svgEl('text', {x:bx(d), y:CH-MB+13, fill:'#2a4a6a', 'font-size':7.5,
+      'font-family':'Courier New,monospace', 'text-anchor':'middle'}, BURNDOWN.dates[d] || ''));
+  });
+
+  // Axes
+  container.appendChild(svgEl('line', {x1:ML, y1:MT, x2:ML, y2:MT+PH, stroke:'#1a2d4a', 'stroke-width':1}));
+  container.appendChild(svgEl('line', {x1:ML, y1:MT+PH, x2:ML+PW, y2:MT+PH, stroke:'#1a2d4a', 'stroke-width':1}));
+
+  // Ideal line
+  const idealPts = BURNDOWN.ideal.map((v,i) => `${bx(i)},${by(v)}`).join(' ');
+  container.appendChild(svgEl('polyline', {points:idealPts, fill:'none',
+    stroke:'#2a4a6a', 'stroke-width':1.5, 'stroke-dasharray':'5,3'}));
+
+  // Forecast line
+  const fcPts = BURNDOWN.forecast.reduce((acc,v,i) => {
+    if (v !== null) acc.push(`${bx(i)},${by(v)}`); return acc;
+  }, []).join(' ');
+  if (fcPts) container.appendChild(svgEl('polyline', {points:fcPts, fill:'none',
+    stroke:'#fb923c', 'stroke-width':1.5, 'stroke-dasharray':'4,3'}));
+
+  // Actual line
+  const actPts = BURNDOWN.actual.reduce((acc,v,i) => {
+    if (v !== null) acc.push(`${bx(i)},${by(v)}`); return acc;
+  }, []).join(' ');
+  container.appendChild(svgEl('polyline', {points:actPts, fill:'none',
+    stroke:'#818cf8', 'stroke-width':2}));
+
+  // Dots on actual
+  BURNDOWN.actual.forEach((v,i) => {
+    if (v === null) return;
+    container.appendChild(svgEl('circle', {cx:bx(i), cy:by(v), r:3.5, fill:'#818cf8',
+      stroke:'#070d1a', 'stroke-width':1.5}));
+  });
+
+  // Dots on forecast
+  BURNDOWN.forecast.forEach((v,i) => {
+    if (v === null || BURNDOWN.actual[i] !== null) return;
+    container.appendChild(svgEl('circle', {cx:bx(i), cy:by(v), r:2.5, fill:'#fb923c',
+      stroke:'#070d1a', 'stroke-width':1}));
+  });
+
+  // NOW marker
+  const nowDay = 5.6;
+  container.appendChild(svgEl('line', {x1:bx(nowDay), y1:MT, x2:bx(nowDay), y2:MT+PH,
+    stroke:'#f87171', 'stroke-width':1, 'stroke-dasharray':'3,2'}));
+  container.appendChild(svgEl('text', {x:bx(nowDay)+3, y:MT+9, fill:'#f87171',
+    'font-size':7, 'font-family':'Courier New,monospace'}, 'NOW'));
+
+  // Sprint end forecast label
+  const lastFc = BURNDOWN.forecast.filter(v => v !== null).at(-1);
+  if (lastFc) {
+    container.appendChild(svgEl('text', {x:bx(n)-2, y:by(lastFc)-5, fill:'#fb923c',
+      'font-size':8, 'font-family':'Courier New,monospace', 'text-anchor':'end'},
+      `${lastFc}pts remaining`));
+  }
+
+  // Legend
+  const legItems = [
+    {col:'#818cf8', label:'Actual',   dash:'none'},
+    {col:'#2a4a6a', label:'Ideal',    dash:'5,3'},
+    {col:'#fb923c', label:'Forecast', dash:'4,3'}
+  ];
+  legItems.forEach((li, i) => {
+    const lx = ML + i * (PW / 3);
+    container.appendChild(svgEl('line', {x1:lx, y1:CH-5, x2:lx+16, y2:CH-5,
+      stroke:li.col, 'stroke-width':1.5, 'stroke-dasharray':li.dash}));
+    container.appendChild(svgEl('text', {x:lx+19, y:CH-2, fill:'#4a6580',
+      'font-size':8, 'font-family':'-apple-system,sans-serif'}, li.label));
+  });
+
+  // Crosshair line (hidden by default)
+  const xhair = svgEl('line', {id:'bd-xhair', x1:0, y1:MT, x2:0, y2:MT+PH,
+    stroke:'#818cf8', 'stroke-width':1, 'stroke-dasharray':'3,2', opacity:0});
+  container.appendChild(xhair);
+
+  // Hover zones — one invisible rect per day column
+  for (let d = 0; d <= n; d++) {
+    const zoneX = d === 0 ? ML : bx(d - 0.5);
+    const zoneX2 = d === n ? ML + PW : bx(d + 0.5);
+    const zone = svgEl('rect', {
+      x: zoneX, y: MT, width: zoneX2 - zoneX, height: PH,
+      fill: 'transparent', cursor: 'crosshair'
+    });
+    zone.addEventListener('mouseenter', e => {
+      xhair.setAttribute('x1', bx(d)); xhair.setAttribute('x2', bx(d));
+      xhair.setAttribute('opacity', 0.6);
+      showBdTT(e, d);
+    });
+    zone.addEventListener('mousemove', moveTT);
+    zone.addEventListener('mouseleave', () => { xhair.setAttribute('opacity', 0); hideTT(); });
+    container.appendChild(zone);
+  }
+}
+
+// ── BLOCKED/AT-RISK PANEL ─────────────────────────────────────────────────────
+function renderRisk(tasks) {
+  const risky = tasks.filter(t => {
+    const st = getStatus(t);
+    return ['blocked','not_started','at_risk','in_progress_late','completed_late'].includes(st);
+  }).sort((a,b) => b.pts - a.pts);
+
+  const el = document.getElementById('risk-list');
+  if (!risky.length) {
+    el.innerHTML = '<div style="padding:14px;font-size:12px;color:#4a6580;text-align:center">No issues in current filter</div>';
+    return;
+  }
+  el.innerHTML = risky.map(t => {
+    const st = getStatus(t);
+    const sc = SC[st] || SC.scheduled;
+    const person = PEOPLE.find(p => p.id === t.person);
+    const projCol = PROJ_COLOR[t.proj];
+    const tagLabel = st === 'blocked' ? 'BLOCKED' : st === 'not_started' ? 'NOT STARTED' : st === 'at_risk' ? 'AT RISK' : st === 'in_progress_late' ? 'LATE' : 'LATE';
+    return `<div class="r-item">
+      <div class="r-dot" style="background:${sc.text}"></div>
+      <div class="r-id" style="color:${projCol}">${t.id}</div>
+      <div class="r-who" style="color:${person?.color||'#4a6580'}" title="${person?.name}">${person?.name.split(' ')[0]}</div>
+      <div class="r-name" title="${t.name}">${t.name}</div>
+      <div class="r-pts" style="color:${sc.text}">${t.pts}pt</div>
+      <div class="r-tag" style="background:${sc.tag_bg};color:${sc.text}">${tagLabel}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── BURNDOWN TOOLTIP ─────────────────────────────────────────────────────────
+function showBdTT(e, day) {
+  const ideal  = BURNDOWN.ideal[day];
+  const actual = BURNDOWN.actual[day];
+  const fc     = BURNDOWN.forecast[day];
+  const date   = BURNDOWN.dates[day] || 'Sprint Start';
+  const isPast = actual !== null;
+  const isFc   = !isPast && fc !== null;
+
+  document.getElementById('tt-title').textContent = `Day ${day} — ${date}`;
+  document.getElementById('tt-body').innerHTML = `
+    <div class="tt-row"><span class="tt-key">Ideal remaining</span>
+      <span class="tt-val" style="color:#2a4a6a">${ideal?.toFixed(1) ?? '—'} pts</span></div>
+    <div class="tt-row"><span class="tt-key">Actual remaining</span>
+      <span class="tt-val" style="color:#818cf8">${actual !== null ? actual + ' pts' : '—'}</span></div>
+    <div class="tt-row"><span class="tt-key">Forecast remaining</span>
+      <span class="tt-val" style="color:#fb923c">${fc !== null ? fc + ' pts' : '—'}</span></div>
+    ${isPast && ideal !== undefined ? (() => {
+      const diff = actual - ideal;
+      const col = diff > 0 ? '#f87171' : '#10d9a0';
+      const lbl = diff > 0 ? `+${diff.toFixed(1)} pts behind ideal` : `${Math.abs(diff).toFixed(1)} pts ahead of ideal`;
+      return `<div style="margin-top:7px;font-size:10px;font-weight:700;color:${col}">${lbl}</div>`;
+    })() : ''}
+    ${isFc ? '<div style="margin-top:7px;font-size:10px;color:#4a6580;font-style:italic">Projected — not yet reached</div>' : ''}
+  `;
+  tt.style.display = 'block';
+  moveTT(e);
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────────────────────────
+const tt = document.getElementById('tt');
+function showTT(e, task, status) {
+  const sc = SC[status] || SC.scheduled;
+  const person = PEOPLE.find(p => p.id === task.person);
+  document.getElementById('tt-title').textContent = task.id + ' — ' + task.name;
+  document.getElementById('tt-body').innerHTML = `
+    <div class="tt-row"><span class="tt-key">Person</span><span class="tt-val" style="color:${person?.color}">${person?.name}</span></div>
+    <div class="tt-row"><span class="tt-key">Project</span><span class="tt-val" style="color:${PROJ_COLOR[task.proj]}">${task.proj}</span></div>
+    <div class="tt-row"><span class="tt-key">Story Points</span><span class="tt-val">${task.pts}pt</span></div>
+    <div class="tt-row"><span class="tt-key">Priority</span><span class="tt-val">${task.pri}</span></div>
+    <div class="tt-row"><span class="tt-key">Planned Start</span><span class="tt-val">${fmtD(task.ps)}</span></div>
+    <div class="tt-row"><span class="tt-key">Planned End</span><span class="tt-val">${fmtD(task.pe)}</span></div>
+    ${task.as ? `<div class="tt-row"><span class="tt-key">Actual Start</span><span class="tt-val">${fmtD(task.as)}</span></div>` : ''}
+    ${task.ae ? `<div class="tt-row"><span class="tt-key">Actual End</span><span class="tt-val">${fmtD(task.ae)}</span></div>` : ''}
+    ${task.fe && !task.ae ? `<div class="tt-row"><span class="tt-key">Forecast End</span><span class="tt-val">${fmtD(task.fe)}</span></div>` : ''}
+    <div><span class="tt-chip" style="background:${sc.tag_bg};color:${sc.text}">${sc.label}</span></div>
+    ${task.notes ? `<div style="margin-top:6px;font-size:10px;color:#4a6580;font-style:italic">${task.notes}</div>` : ''}
+  `;
+  tt.style.display = 'block';
+  moveTT(e);
+}
+function moveTT(e) {
+  const r = tt.getBoundingClientRect();
+  const x = e.clientX + 16, y = e.clientY - 10;
+  tt.style.left = (x + r.width > window.innerWidth - 10 ? e.clientX - r.width - 10 : x) + 'px';
+  tt.style.top  = (y + r.height > window.innerHeight - 10 ? e.clientY - r.height - 10 : y) + 'px';
+}
+function hideTT() { tt.style.display = 'none'; }
+function fmtD(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) + ' ' +
+    d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+// ── FILTER SETUP ──────────────────────────────────────────────────────────────
+function setupFilters() {
+  const ps = document.getElementById('f-person');
+  PEOPLE.forEach(p => { const o = document.createElement('option'); o.value=p.id; o.textContent=p.name+' — '+p.role; ps.appendChild(o); });
+  ['f-person','f-proj','f-status'].forEach(id => {
+    document.getElementById(id).addEventListener('change', e => { filters[id.slice(2)] = e.target.value; refresh(); });
+  });
+}
+function resetFilters() {
+  filters = {person:'', proj:'', status:''};
+  ['f-person','f-proj','f-status'].forEach(id => document.getElementById(id).value='');
+  refresh();
+}
+
+function refresh() {
+  const tasks = filteredTasks();
+  document.getElementById('f-count').textContent = `Showing ${tasks.length} of ${TASKS.length} tasks`;
+  renderGantt(tasks);
+  renderRisk(tasks);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+setupFilters();
+refresh();
+renderBurndown();
+window.addEventListener('resize', () => { refresh(); renderBurndown(); });
+</script>
+</body>
+</html>
