@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Schedule — Plant Floor Operations</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto',sans-serif;background:#0d1117;color:#f0f6fc;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#161b22}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:3px}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#161b22;border-bottom:1px solid #30363d;gap:20px;flex-wrap:wrap}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-icon{width:38px;height:38px;background:linear-gradient(135deg,#3fb950,#1a7f37);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hdr-title{font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#f0f6fc}
+.hdr-sub{font-size:11px;color:#8b949e;margin-top:2px;font-family:'Courier New',monospace;letter-spacing:0.05em}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.clock{font-family:'Courier New',monospace;font-size:13px;color:#3fb950;background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.2);padding:5px 12px;border-radius:6px}
+.hdr-badge{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b949e;background:#21262d;border:1px solid #30363d;padding:4px 10px;border-radius:4px}
+
+/* INCIDENT BANNER */
+.incident{display:flex;align-items:center;gap:10px;padding:7px 28px;background:rgba(248,81,73,0.07);border-bottom:1px solid rgba(248,81,73,0.18);font-size:12px;color:#ff7b72}
+.incident-dot{width:7px;height:7px;border-radius:50%;background:#f85149;animation:pulse 1.5s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 28px 0}
+.kpi{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 18px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.kpi:hover{border-color:#58a6ff}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:10px 0 0 10px}
+.kpi.g::before{background:#3fb950}.kpi.r::before{background:#f85149}.kpi.o::before{background:#f0883e}.kpi.b::before{background:#58a6ff}
+.kpi-lbl{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#6b7280;margin-bottom:8px}
+.kpi-val{font-size:34px;font-weight:800;letter-spacing:-0.03em;line-height:1}
+.kpi.g .kpi-val{color:#3fb950}.kpi.r .kpi-val{color:#f85149}.kpi.o .kpi-val{color:#f0883e}.kpi.b .kpi-val{color:#58a6ff}
+.kpi-sub{font-size:11px;color:#8b949e;margin-top:5px}
+.kpi-trend{position:absolute;bottom:14px;right:16px;font-size:20px;opacity:0.15}
+
+/* FILTERS */
+.filters{display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:1px solid #30363d;flex-wrap:wrap}
+.f-lbl{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#6b7280;margin-right:4px}
+select.fsel{background:#21262d;color:#f0f6fc;border:1px solid #30363d;border-radius:6px;padding:5px 28px 5px 10px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5'%3E%3Cpath fill='%238b949e' d='M0 0l4.5 5L9 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;transition:border-color 0.15s}
+select.fsel:hover{border-color:#58a6ff}
+.f-sep{color:#30363d;margin:0 2px}
+.f-reset{background:none;border:1px solid #30363d;color:#8b949e;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-left:auto}
+.f-reset:hover{border-color:#58a6ff;color:#58a6ff}
+.f-count{font-size:11px;color:#8b949e;font-family:'Courier New',monospace}
+
+/* MAIN LAYOUT */
+.main{display:grid;grid-template-columns:1fr 320px;gap:16px;padding:16px 28px 24px;align-items:start}
+
+/* GANTT PANEL */
+.gantt-panel{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #30363d}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#8b949e}
+.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#8b949e}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.gantt-scroll{overflow-x:auto;overflow-y:hidden}
+
+/* SIDE PANEL */
+.side{display:flex;flex-direction:column;gap:14px}
+.side-card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden}
+.trouble-scroll{overflow-y:auto;max-height:298px}
+.t-item{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #21262d;cursor:default;transition:background 0.12s}
+.t-item:last-child{border-bottom:none}
+.t-item:hover{background:#21262d}
+.t-id{font-size:10px;font-weight:700;font-family:'Courier New',monospace;width:56px;flex-shrink:0}
+.t-mach{font-size:10px;font-weight:700;letter-spacing:0.06em;width:60px;flex-shrink:0}
+.t-name{font-size:11px;color:#c9d1d9;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-var{font-size:11px;font-weight:800;font-family:'Courier New',monospace;white-space:nowrap;flex-shrink:0}
+.t-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.util-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #21262d}
+.util-row:last-child{border-bottom:none}
+.util-m{font-size:10px;font-weight:700;font-family:'Courier New',monospace;color:#8b949e;width:58px;flex-shrink:0}
+.util-bg{flex:1;height:7px;background:#21262d;border-radius:4px;overflow:hidden}
+.util-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.util-pct{font-size:11px;font-weight:700;font-family:'Courier New',monospace;width:34px;text-align:right;flex-shrink:0}
+
+/* TOOLTIP */
+#tt{position:fixed;background:#21262d;border:1px solid #30363d;border-radius:8px;padding:12px 14px;font-size:12px;pointer-events:none;z-index:1000;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,0.6);display:none;transition:opacity 0.1s}
+.tt-title{font-size:13px;font-weight:700;color:#f0f6fc;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #30363d}
+.tt-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:3px}
+.tt-key{color:#8b949e;font-size:11px}
+.tt-val{font-weight:600;color:#f0f6fc;font-family:'Courier New',monospace;font-size:11px}
+.tt-chip{display:inline-block;font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:2px 7px;border-radius:99px;margin-top:6px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-icon">⚙</div>
+    <div>
+      <div class="hdr-title">Production Schedule — Plant Floor</div>
+      <div class="hdr-sub">PRECISION COMPONENTS MFG · WEEK 23–24 · JUNE 1–14, 2026</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-badge">8 Machines · 54 Jobs</div>
+    <div class="clock" id="clock">⬤ LIVE — 08 Jun 14:00</div>
+  </div>
+</div>
+
+<!-- INCIDENT BANNER -->
+<div class="incident">
+  <div class="incident-dot"></div>
+  <strong>ACTIVE INCIDENT:</strong>&nbsp;WELD-01 sensor failure Jun 3 18:30 → Jun 5 06:00 (35.5h offline) — cascading delays on ASSY-A, PAINT-1 and QC-LAB downstream.
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi-row">
+  <div class="kpi g">
+    <div class="kpi-lbl">Schedule Adherence</div>
+    <div class="kpi-val" id="kpi-adhere">—</div>
+    <div class="kpi-sub" id="kpi-adhere-sub">of completed jobs on time</div>
+    <div class="kpi-trend">📈</div>
+  </div>
+  <div class="kpi r">
+    <div class="kpi-lbl">Jobs Delayed / At Risk</div>
+    <div class="kpi-val" id="kpi-delayed">—</div>
+    <div class="kpi-sub" id="kpi-delayed-sub">require immediate attention</div>
+    <div class="kpi-trend">⚠</div>
+  </div>
+  <div class="kpi o">
+    <div class="kpi-lbl">Avg Delay (active)</div>
+    <div class="kpi-val" id="kpi-avgdelay">—</div>
+    <div class="kpi-sub">hours behind schedule</div>
+    <div class="kpi-trend">⏱</div>
+  </div>
+  <div class="kpi b">
+    <div class="kpi-lbl">CNC-02 Advantage</div>
+    <div class="kpi-val" id="kpi-best">—</div>
+    <div class="kpi-sub">avg hours ahead of plan</div>
+    <div class="kpi-trend">🏆</div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <span class="f-lbl">Filter:</span>
+  <select class="fsel" id="f-machine"><option value="">All Machines</option></select>
+  <span class="f-sep">|</span>
+  <select class="fsel" id="f-status">
+    <option value="">All Statuses</option>
+    <option value="completed">Completed</option>
+    <option value="in_progress">In Progress</option>
+    <option value="delayed">Delayed</option>
+    <option value="at_risk">At Risk</option>
+    <option value="scheduled">Scheduled</option>
+  </select>
+  <span class="f-sep">|</span>
+  <select class="fsel" id="f-priority">
+    <option value="">All Priorities</option>
+    <option value="HIGH">High</option>
+    <option value="MEDIUM">Medium</option>
+    <option value="LOW">Low</option>
+  </select>
+  <span class="f-count" id="f-count"></span>
+  <button class="f-reset" onclick="resetFilters()">Reset</button>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- GANTT -->
+  <div class="gantt-panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Gantt — Planned vs Actual Timeline</span>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-sq" style="background:#3fb950"></div>Ahead / On Time</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#58a6ff"></div>In Progress</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#f0883e"></div>Late</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#f85149"></div>Delayed</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#e3b341"></div>At Risk</div>
+        <div class="leg-item"><div class="leg-sq" style="border:1px dashed #6b7280;background:transparent"></div>Planned</div>
+      </div>
+    </div>
+    <div class="gantt-scroll"><svg id="gantt-svg" style="display:block"></svg></div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side">
+    <div class="side-card">
+      <div class="panel-hdr"><span class="panel-title">⚠ Jobs in Trouble</span></div>
+      <div class="trouble-scroll" id="trouble-list"></div>
+    </div>
+    <div class="side-card">
+      <div class="panel-hdr"><span class="panel-title">Machine Utilisation (Jun 1–Now)</span></div>
+      <div id="util-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="tt">
+  <div class="tt-title" id="tt-title"></div>
+  <div id="tt-body"></div>
+</div>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const JOBS = [
+  {id:'JOB-001',name:'Valve Body — Batch A',      m:'CNC-01', prod:'Valve Body',   op:'James O.', pri:'HIGH',   ps:'2026-06-01T06:00',pe:'2026-06-02T06:00',as:'2026-06-01T06:00',ae:'2026-06-02T04:30',fe:null,    notes:'Completed 1.5h early'},
+  {id:'JOB-002',name:'Pump Housing — Run #7',     m:'CNC-01', prod:'Pump Housing', op:'James O.', pri:'MEDIUM', ps:'2026-06-02T06:30',pe:'2026-06-03T14:30',as:'2026-06-02T07:00',ae:'2026-06-03T16:00',fe:null,    notes:'Minor material wait'},
+  {id:'JOB-003',name:'Manifold Block — P238',     m:'CNC-01', prod:'Manifold',     op:'Sarah K.', pri:'MEDIUM', ps:'2026-06-03T15:00',pe:'2026-06-05T02:00',as:'2026-06-03T16:30',ae:'2026-06-05T05:30',fe:null,    notes:'Late start cascade'},
+  {id:'JOB-004',name:'Cylinder Head — Set C',     m:'CNC-01', prod:'Cylinder Head',op:'Sarah K.', pri:'HIGH',   ps:'2026-06-05T03:00',pe:'2026-06-06T19:00',as:'2026-06-05T06:30',ae:'2026-06-06T23:00',fe:null,    notes:'Cascade from JOB-003'},
+  {id:'JOB-005',name:'Bracket Assy — Series 4',  m:'CNC-01', prod:'Bracket',      op:'James O.', pri:'LOW',    ps:'2026-06-07T06:00',pe:'2026-06-08T14:00',as:'2026-06-07T06:00',ae:null,               fe:'2026-06-08T15:30',notes:'In progress — on track'},
+  {id:'JOB-006',name:'Valve Body — Batch B',      m:'CNC-01', prod:'Valve Body',   op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-08T16:00',pe:'2026-06-10T08:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-007',name:'Pump Housing — Run #8',     m:'CNC-01', prod:'Pump Housing', op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-10T09:00',pe:'2026-06-12T01:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-008',name:'Manifold Block — P239',     m:'CNC-02', prod:'Manifold',     op:'Anna R.',  pri:'HIGH',   ps:'2026-06-01T06:00',pe:'2026-06-02T14:00',as:'2026-06-01T06:00',ae:'2026-06-02T10:00',fe:null,    notes:'4h ahead — new tooling'},
+  {id:'JOB-009',name:'Cylinder Head — Set D',     m:'CNC-02', prod:'Cylinder Head',op:'Anna R.',  pri:'HIGH',   ps:'2026-06-02T15:00',pe:'2026-06-04T07:00',as:'2026-06-02T11:30',ae:'2026-06-04T02:00',fe:null,    notes:'Continued early run'},
+  {id:'JOB-010',name:'Bracket Assy — Series 5',  m:'CNC-02', prod:'Bracket',      op:'Chen L.',  pri:'MEDIUM', ps:'2026-06-04T08:00',pe:'2026-06-05T16:00',as:'2026-06-04T03:30',ae:'2026-06-05T08:00',fe:null,    notes:'8h ahead — high performer'},
+  {id:'JOB-011',name:'Valve Body — Batch C',      m:'CNC-02', prod:'Valve Body',   op:'Chen L.',  pri:'HIGH',   ps:'2026-06-05T17:00',pe:'2026-06-07T01:00',as:'2026-06-05T09:00',ae:'2026-06-06T14:00',fe:null,    notes:'Best run this period'},
+  {id:'JOB-012',name:'Manifold Block — P240',     m:'CNC-02', prod:'Manifold',     op:'Anna R.',  pri:'MEDIUM', ps:'2026-06-07T02:00',pe:'2026-06-08T18:00',as:'2026-06-06T15:00',ae:null,               fe:'2026-06-08T14:00',notes:'In progress — running ahead'},
+  {id:'JOB-013',name:'Pump Housing — Run #9',     m:'CNC-02', prod:'Pump Housing', op:'Anna R.',  pri:'MEDIUM', ps:'2026-06-09T00:00',pe:'2026-06-10T16:00',as:null,              ae:null,               fe:'2026-06-10T12:00',notes:'Likely to start early'},
+  {id:'JOB-014',name:'Cylinder Head — Set E',     m:'CNC-02', prod:'Cylinder Head',op:'Chen L.',  pri:'HIGH',   ps:'2026-06-11T00:00',pe:'2026-06-12T16:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-015',name:'Bracket Weld — W041',       m:'WELD-01',prod:'Bracket',      op:'Dave P.',  pri:'MEDIUM', ps:'2026-06-01T06:00',pe:'2026-06-02T22:00',as:'2026-06-01T06:00',ae:'2026-06-02T22:30',fe:null,    notes:'On time'},
+  {id:'JOB-016',name:'Frame Joint — FJ-119',      m:'WELD-01',prod:'Valve Body',   op:'Dave P.',  pri:'MEDIUM', ps:'2026-06-03T00:00',pe:'2026-06-03T16:00',as:'2026-06-03T00:00',ae:'2026-06-03T16:30',fe:null,    notes:'On time'},
+  {id:'JOB-017',name:'Pump Manifold — PM-77',     m:'WELD-01',prod:'Manifold',     op:'Dave P.',  pri:'HIGH',   ps:'2026-06-03T17:00',pe:'2026-06-04T09:00',as:'2026-06-03T17:00',ae:'2026-06-05T22:00',fe:null,    notes:'BREAKDOWN — sensor failure'},
+  {id:'JOB-018',name:'Cylinder Weld — CW-33',     m:'WELD-01',prod:'Cylinder Head',op:'Emma W.',  pri:'HIGH',   ps:'2026-06-04T10:00',pe:'2026-06-05T02:00',as:'2026-06-05T23:00',ae:'2026-06-06T15:00',fe:null,    notes:'Cascade from breakdown'},
+  {id:'JOB-019',name:'Bracket Weld — W042',       m:'WELD-01',prod:'Bracket',      op:'Emma W.',  pri:'HIGH',   ps:'2026-06-05T03:00',pe:'2026-06-06T19:00',as:'2026-06-06T16:00',ae:'2026-06-08T08:00',fe:null,    notes:'Cascade from breakdown'},
+  {id:'JOB-020',name:'Frame Joint — FJ-120',      m:'WELD-01',prod:'Valve Body',   op:'Dave P.',  pri:'MEDIUM', ps:'2026-06-07T00:00',pe:'2026-06-08T16:00',as:'2026-06-08T09:00',ae:null,               fe:'2026-06-10T01:00',notes:'In progress — heavily delayed'},
+  {id:'JOB-021',name:'Pump Manifold — PM-78',     m:'WELD-01',prod:'Manifold',     op:'Dave P.',  pri:'MEDIUM', ps:'2026-06-09T00:00',pe:'2026-06-10T16:00',as:null,              ae:null,               fe:'2026-06-11T23:00',notes:'At risk — cascade impact'},
+  {id:'JOB-022',name:'Cylinder Weld — CW-34',     m:'WELD-01',prod:'Cylinder Head',op:'Emma W.',  pri:'LOW',    ps:'2026-06-11T00:00',pe:'2026-06-12T16:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-023',name:'Valve Weld — VW-055',       m:'WELD-02',prod:'Valve Body',   op:'Ryan B.',  pri:'MEDIUM', ps:'2026-06-01T06:00',pe:'2026-06-02T14:00',as:'2026-06-01T06:00',ae:'2026-06-02T15:30',fe:null,    notes:'Slight overrun'},
+  {id:'JOB-024',name:'Pump Frame — PF-033',       m:'WELD-02',prod:'Pump Housing', op:'Ryan B.',  pri:'HIGH',   ps:'2026-06-02T16:00',pe:'2026-06-04T08:00',as:'2026-06-02T16:30',ae:'2026-06-04T09:00',fe:null,    notes:'On time'},
+  {id:'JOB-025',name:'Bracket Weld — W043',       m:'WELD-02',prod:'Bracket',      op:'Emma W.',  pri:'MEDIUM', ps:'2026-06-04T09:00',pe:'2026-06-05T17:00',as:'2026-06-04T09:30',ae:'2026-06-05T17:30',fe:null,    notes:'On time'},
+  {id:'JOB-026',name:'Manifold Weld — MW-011',    m:'WELD-02',prod:'Manifold',     op:'Ryan B.',  pri:'MEDIUM', ps:'2026-06-05T18:00',pe:'2026-06-07T10:00',as:'2026-06-05T18:00',ae:'2026-06-07T10:30',fe:null,    notes:'On time'},
+  {id:'JOB-027',name:'Valve Weld — VW-056',       m:'WELD-02',prod:'Valve Body',   op:'Ryan B.',  pri:'LOW',    ps:'2026-06-07T11:00',pe:'2026-06-08T19:00',as:'2026-06-07T11:30',ae:null,               fe:'2026-06-08T20:00',notes:'In progress — on track'},
+  {id:'JOB-028',name:'Pump Frame — PF-034',       m:'WELD-02',prod:'Pump Housing', op:'Emma W.',  pri:'MEDIUM', ps:'2026-06-08T20:00',pe:'2026-06-10T12:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-029',name:'Bracket Weld — W045',       m:'WELD-02',prod:'Bracket',      op:'Ryan B.',  pri:'MEDIUM', ps:'2026-06-10T13:00',pe:'2026-06-12T05:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-030',name:'Valve Sub-Assy — VSA-201',  m:'ASSY-A', prod:'Valve Body',   op:'Mike T.',  pri:'HIGH',   ps:'2026-06-01T06:00',pe:'2026-06-03T14:00',as:'2026-06-01T06:00',ae:'2026-06-03T16:00',fe:null,    notes:'Slight delay'},
+  {id:'JOB-031',name:'Pump Assembly — PA-088',    m:'ASSY-A', prod:'Pump Housing', op:'Mike T.',  pri:'HIGH',   ps:'2026-06-03T15:00',pe:'2026-06-05T07:00',as:'2026-06-03T15:30',ae:'2026-06-05T09:00',fe:null,    notes:'Slight delay'},
+  {id:'JOB-032',name:'Bracket Sub-Assy — BSA-44',m:'ASSY-A', prod:'Bracket',      op:'Sarah K.', pri:'MEDIUM', ps:'2026-06-05T08:00',pe:'2026-06-06T16:00',as:'2026-06-07T14:00',ae:null,               fe:'2026-06-08T22:00',notes:'Waiting WELD-01 parts'},
+  {id:'JOB-033',name:'Manifold Assembly — MA-029',m:'ASSY-A', prod:'Manifold',     op:'Sarah K.', pri:'HIGH',   ps:'2026-06-06T17:00',pe:'2026-06-08T09:00',as:null,              ae:null,               fe:'2026-06-10T01:00',notes:'Blocked on WELD-01'},
+  {id:'JOB-034',name:'Valve Sub-Assy — VSA-202',  m:'ASSY-A', prod:'Valve Body',   op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-08T10:00',pe:'2026-06-10T02:00',as:null,              ae:null,               fe:'2026-06-11T14:00',notes:'At risk — upstream cascade'},
+  {id:'JOB-035',name:'Cylinder Assembly — CA-017',m:'ASSY-A', prod:'Cylinder Head',op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-10T03:00',pe:'2026-06-12T19:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-036',name:'Pump Sub-Assy — PSA-066',  m:'ASSY-B', prod:'Pump Housing', op:'Chen L.',  pri:'HIGH',   ps:'2026-06-01T06:00',pe:'2026-06-03T22:00',as:'2026-06-01T06:00',ae:'2026-06-03T22:30',fe:null,    notes:'On time'},
+  {id:'JOB-037',name:'Cylinder Sub-Assy — CSA-011',m:'ASSY-B',prod:'Cylinder Head',op:'Chen L.', pri:'MEDIUM', ps:'2026-06-04T00:00',pe:'2026-06-05T16:00',as:'2026-06-04T00:30',ae:'2026-06-05T17:00',fe:null,    notes:'On time'},
+  {id:'JOB-038',name:'Bracket Assembly — BA-103', m:'ASSY-B', prod:'Bracket',      op:'Anna R.',  pri:'MEDIUM', ps:'2026-06-05T17:00',pe:'2026-06-07T09:00',as:'2026-06-05T17:30',ae:'2026-06-07T09:00',fe:null,    notes:'Completed on time'},
+  {id:'JOB-039',name:'Pump Sub-Assy — PSA-067',  m:'ASSY-B', prod:'Pump Housing', op:'Anna R.',  pri:'HIGH',   ps:'2026-06-07T10:00',pe:'2026-06-08T18:00',as:'2026-06-07T10:00',ae:null,               fe:'2026-06-08T18:00',notes:'In progress — on track'},
+  {id:'JOB-040',name:'Valve Assembly — VA-055',   m:'ASSY-B', prod:'Valve Body',   op:'Chen L.',  pri:'MEDIUM', ps:'2026-06-08T19:00',pe:'2026-06-10T11:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-041',name:'Cylinder Assembly — CA-018',m:'ASSY-B', prod:'Cylinder Head',op:'Chen L.',  pri:'LOW',    ps:'2026-06-10T12:00',pe:'2026-06-12T04:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-042',name:'Valve Body Paint — Batch A',m:'PAINT-1',prod:'Valve Body',   op:'James O.', pri:'MEDIUM', ps:'2026-06-01T06:00',pe:'2026-06-02T06:00',as:'2026-06-01T06:00',ae:'2026-06-02T06:30',fe:null,    notes:'On time'},
+  {id:'JOB-043',name:'Pump Housing Paint — Run 7',m:'PAINT-1',prod:'Pump Housing', op:'James O.', pri:'HIGH',   ps:'2026-06-02T07:00',pe:'2026-06-03T07:00',as:'2026-06-02T07:00',ae:'2026-06-03T18:00',fe:null,    notes:'REWORK — paint adhesion'},
+  {id:'JOB-044',name:'Bracket Paint — Series 4',  m:'PAINT-1',prod:'Bracket',      op:'Sarah K.', pri:'MEDIUM', ps:'2026-06-03T19:00',pe:'2026-06-05T11:00',as:'2026-06-03T19:30',ae:'2026-06-05T13:30',fe:null,    notes:'Cascade from rework'},
+  {id:'JOB-045',name:'Manifold Paint — P238',     m:'PAINT-1',prod:'Manifold',     op:'Sarah K.', pri:'MEDIUM', ps:'2026-06-05T14:00',pe:'2026-06-07T06:00',as:'2026-06-05T15:00',ae:'2026-06-07T11:00',fe:null,    notes:'Cascade continues'},
+  {id:'JOB-046',name:'Cylinder Head Paint — Set C',m:'PAINT-1',prod:'Cylinder Head',op:'James O.',pri:'HIGH',  ps:'2026-06-07T12:00',pe:'2026-06-08T20:00',as:'2026-06-07T16:00',ae:null,               fe:'2026-06-09T06:00',notes:'In progress — delayed start'},
+  {id:'JOB-047',name:'Valve Body Paint — Batch B',m:'PAINT-1',prod:'Valve Body',   op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-09T00:00',pe:'2026-06-10T08:00',as:null,              ae:null,               fe:'2026-06-10T18:00',notes:'At risk — booth backlogged'},
+  {id:'JOB-048',name:'Pump Housing Paint — Run 8',m:'PAINT-1',prod:'Pump Housing', op:'Mike T.',  pri:'MEDIUM', ps:'2026-06-10T09:00',pe:'2026-06-11T17:00',as:null,              ae:null,               fe:null,    notes:'Scheduled'},
+  {id:'JOB-049',name:'Valve Body Inspection',     m:'QC-LAB', prod:'Valve Body',   op:'Ryan B.',  pri:'MEDIUM', ps:'2026-06-01T06:00',pe:'2026-06-02T14:00',as:'2026-06-01T06:00',ae:'2026-06-02T14:30',fe:null,    notes:'On time'},
+  {id:'JOB-050',name:'Pump Housing Inspection',   m:'QC-LAB', prod:'Pump Housing', op:'Ryan B.',  pri:'HIGH',   ps:'2026-06-02T15:00',pe:'2026-06-04T07:00',as:'2026-06-02T15:00',ae:'2026-06-04T09:00',fe:null,    notes:'Slight backlog'},
+  {id:'JOB-051',name:'Bracket Inspection',        m:'QC-LAB', prod:'Bracket',      op:'Emma W.',  pri:'MEDIUM', ps:'2026-06-04T08:00',pe:'2026-06-06T00:00',as:'2026-06-04T09:30',ae:'2026-06-06T03:30',fe:null,    notes:'Growing backlog'},
+  {id:'JOB-052',name:'Manifold Inspection',       m:'QC-LAB', prod:'Manifold',     op:'Emma W.',  pri:'HIGH',   ps:'2026-06-06T01:00',pe:'2026-06-07T17:00',as:'2026-06-06T04:00',ae:'2026-06-07T22:00',fe:null,    notes:'Backlog deepening'},
+  {id:'JOB-053',name:'Cylinder Head Inspection',  m:'QC-LAB', prod:'Cylinder Head',op:'Ryan B.',  pri:'HIGH',   ps:'2026-06-07T23:00',pe:'2026-06-09T15:00',as:'2026-06-08T03:00',ae:null,               fe:'2026-06-10T00:00',notes:'In progress — delayed'},
+  {id:'JOB-054',name:'Valve Body Inspection II',  m:'QC-LAB', prod:'Valve Body',   op:'Emma W.',  pri:'MEDIUM', ps:'2026-06-09T16:00',pe:'2026-06-11T08:00',as:null,              ae:null,               fe:'2026-06-11T18:00',notes:'At risk — cascade'}
+];
+
+const MACHINES = [
+  {id:'CNC-01', label:'CNC-01',  type:'CNC Machining',  color:'#58a6ff'},
+  {id:'CNC-02', label:'CNC-02',  type:'CNC Machining',  color:'#79c0ff'},
+  {id:'WELD-01',label:'WELD-01', type:'Welding',         color:'#f85149'},
+  {id:'WELD-02',label:'WELD-02', type:'Welding',         color:'#ffa198'},
+  {id:'ASSY-A', label:'ASSY-A',  type:'Assembly Line A', color:'#3fb950'},
+  {id:'ASSY-B', label:'ASSY-B',  type:'Assembly Line B', color:'#7ee787'},
+  {id:'PAINT-1',label:'PAINT-1', type:'Paint Booth',     color:'#e3b341'},
+  {id:'QC-LAB', label:'QC-LAB',  type:'Quality Control', color:'#d2a8ff'}
+];
+
+const CHART_START = new Date('2026-06-01T00:00:00');
+const CHART_END   = new Date('2026-06-15T00:00:00');
+const NOW         = new Date('2026-06-08T14:00:00');
+
+// ── STATUS LOGIC ─────────────────────────────────────────────────────────────
+function getStatus(j) {
+  const ps = new Date(j.ps), pe = new Date(j.pe);
+  if (j.ae) {
+    const v = (new Date(j.ae) - pe) / 3600000;
+    return v < -2 ? 'completed_ahead' : v <= 2 ? 'completed_ontime' : 'completed_late';
+  }
+  if (j.as) {
+    const fe = new Date(j.fe || j.pe);
+    return (fe - pe) / 3600000 > 2 ? 'in_progress_late' : 'in_progress';
+  }
+  if (ps < NOW) return 'delayed';
+  if (j.fe && new Date(j.fe) > pe) return 'at_risk';
+  return 'scheduled';
+}
+
+function getVariance(j) {
+  const pe = new Date(j.pe);
+  if (j.ae) return (new Date(j.ae) - pe) / 3600000;
+  if (j.fe) return (new Date(j.fe) - pe) / 3600000;
+  if (j.as && !j.ae) return (NOW - pe) / 3600000;
+  if (!j.as && new Date(j.ps) < NOW) return (NOW - new Date(j.ps)) / 3600000;
+  return 0;
+}
+
+const SC = {
+  completed_ahead:  {fill:'#3fb950', light:'rgba(63,185,80,0.15)',  text:'#3fb950', label:'Ahead'},
+  completed_ontime: {fill:'#3fb950', light:'rgba(63,185,80,0.12)',  text:'#3fb950', label:'On Time'},
+  completed_late:   {fill:'#f0883e', light:'rgba(240,136,62,0.15)', text:'#f0883e', label:'Late'},
+  in_progress:      {fill:'#58a6ff', light:'rgba(88,166,255,0.15)', text:'#58a6ff', label:'In Progress'},
+  in_progress_late: {fill:'#f97316', light:'rgba(249,115,22,0.15)', text:'#f97316', label:'Running Late'},
+  delayed:          {fill:'#f85149', light:'rgba(248,81,73,0.18)',  text:'#f85149', label:'Delayed'},
+  at_risk:          {fill:'#e3b341', light:'rgba(227,179,65,0.15)', text:'#e3b341', label:'At Risk'},
+  scheduled:        {fill:'#484f58', light:'rgba(72,79,88,0.15)',   text:'#8b949e', label:'Scheduled'}
+};
+
+// ── FILTER STATE ─────────────────────────────────────────────────────────────
+let filters = {machine:'', status:'', priority:''};
+
+function filteredJobs() {
+  return JOBS.filter(j => {
+    if (filters.machine && j.m !== filters.machine) return false;
+    const st = getStatus(j);
+    if (filters.status) {
+      const base = st.replace('completed_ahead','completed').replace('completed_ontime','completed')
+        .replace('completed_late','completed').replace('in_progress_late','in_progress');
+      if (base !== filters.status && st !== filters.status) return false;
+    }
+    if (filters.priority && j.pri !== filters.priority) return false;
+    return true;
+  });
+}
+
+// ── SVG HELPERS ──────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+
+// ── GANTT RENDER ─────────────────────────────────────────────────────────────
+function renderGantt(jobs) {
+  const svg = document.getElementById('gantt-svg');
+  svg.innerHTML = '';
+
+  const LW = 120, PAD = 16, RH = 68, HH = 52, BH = 20, PBH = 26;
+  const DAYS = 14;
+  const minChartW = DAYS * 72;
+  const containerW = svg.parentElement.clientWidth || 900;
+  const CW = Math.max(containerW - LW - PAD, minChartW);
+  const totalW = LW + CW + PAD;
+  const totalH = MACHINES.length * RH + HH + 10;
+  const totalMs = CHART_END - CHART_START;
+
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+
+  function tx(d) { return LW + ((new Date(d) - CHART_START) / totalMs) * CW; }
+  function ty(mi) { return HH + mi * RH; }
+
+  // Background
+  svg.appendChild(el('rect', {x:0, y:0, width:totalW, height:totalH, fill:'#0d1117'}));
+
+  // Defs for clip paths
+  const defs = el('defs', {});
+  svg.appendChild(defs);
+
+  // Weekend shading & day grid
+  for (let d = 0; d < DAYS; d++) {
+    const date = new Date(CHART_START); date.setDate(date.getDate() + d);
+    const x = tx(date);
+    const dayW = CW / DAYS;
+    const dow = date.getDay();
+    if (dow === 0 || dow === 6) {
+      svg.appendChild(el('rect', {x, y:HH, width:dayW, height:MACHINES.length*RH, fill:'rgba(255,255,255,0.02)'}));
+    }
+    svg.appendChild(el('line', {x1:x, y1:HH-8, x2:x, y2:totalH-4,
+      stroke: dow===1?'#30363d':'#1c2128', 'stroke-width': dow===1?1:0.5}));
+    // Date label
+    const dlbl = el('text', {x: x+dayW/2, y:22, fill:'#8b949e', 'font-size':10,
+      'font-family':'Courier New,monospace', 'text-anchor':'middle'});
+    dlbl.textContent = date.toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+    svg.appendChild(dlbl);
+    const dow_lbl = el('text', {x: x+dayW/2, y:38, fill:'#484f58', 'font-size':9,
+      'font-family':'Courier New,monospace', 'text-anchor':'middle'});
+    dow_lbl.textContent = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+    svg.appendChild(dow_lbl);
+  }
+
+  // Axis line
+  svg.appendChild(el('line', {x1:LW, y1:HH, x2:totalW-PAD, y2:HH, stroke:'#30363d', 'stroke-width':1}));
+
+  // TODAY marker
+  const tx_now = tx(NOW);
+  svg.appendChild(el('line', {x1:tx_now, y1:HH-8, x2:tx_now, y2:totalH-4,
+    stroke:'#f85149', 'stroke-width':1.5, 'stroke-dasharray':'5,3'}));
+  const nowLbl = el('text', {x:tx_now, y:HH-12, fill:'#f85149', 'font-size':9,
+    'font-family':'Courier New,monospace', 'text-anchor':'middle', 'font-weight':'bold'});
+  nowLbl.textContent = 'NOW';
+  svg.appendChild(nowLbl);
+
+  // Machine rows
+  MACHINES.forEach((mach, mi) => {
+    const ry = ty(mi);
+    const active = !filters.machine || filters.machine === mach.id;
+
+    svg.appendChild(el('rect', {x:0, y:ry, width:totalW,
+      height:RH, fill: mi%2===0 ? '#111820':'#0d1117'}));
+
+    // Machine label area
+    svg.appendChild(el('rect', {x:3, y:ry+RH/2-14, width:3, height:28,
+      fill: active ? mach.color : '#333', rx:2}));
+    const ml = el('text', {x:12, y:ry+RH/2-2, fill: active ? mach.color : '#484f58',
+      'font-size':11, 'font-family':'Courier New,monospace', 'font-weight':'bold'});
+    ml.textContent = mach.id;
+    svg.appendChild(ml);
+    const mtype = el('text', {x:12, y:ry+RH/2+12, fill:'#484f58',
+      'font-size':9, 'font-family':'-apple-system,sans-serif'});
+    mtype.textContent = mach.type;
+    svg.appendChild(mtype);
+
+    svg.appendChild(el('line', {x1:0, y1:ry+RH, x2:totalW, y2:ry+RH,
+      stroke:'#21262d', 'stroke-width':1}));
+
+    // Jobs for this machine
+    const mJobs = jobs.filter(j => j.m === mach.id);
+    mJobs.forEach(job => {
+      const status = getStatus(job);
+      const sc = SC[status];
+      const variance = getVariance(job);
+
+      const px1 = tx(job.ps), px2 = tx(job.pe), pw = Math.max(px2-px1, 3);
+      const pyOff = (RH - PBH) / 2;
+
+      // Planned bar (dashed outline)
+      const pb = el('rect', {x:px1, y:ry+pyOff, width:pw, height:PBH,
+        fill:'transparent', stroke:sc.fill, 'stroke-width':1,
+        'stroke-dasharray':'4,2', rx:3, opacity:0.35});
+      svg.appendChild(pb);
+
+      // Actual/forecast bar
+      let ax1, ax2;
+      if (job.as) {
+        ax1 = tx(job.as);
+        ax2 = job.ae ? tx(job.ae) : tx(job.fe || NOW);
+      } else {
+        ax1 = tx(job.ps);
+        ax2 = tx(job.fe || job.pe);
+      }
+      const aw = Math.max(ax2 - ax1, 3);
+      const ayOff = (RH - BH) / 2;
+
+      if (status === 'in_progress' || status === 'in_progress_late') {
+        // Completed portion
+        const prog_x2 = tx(NOW);
+        const prog_w = Math.max(Math.min(prog_x2, ax2) - ax1, 0);
+        if (prog_w > 0) {
+          const pb2 = el('rect', {x:ax1, y:ry+ayOff, width:prog_w, height:BH,
+            fill:sc.fill, rx:3, opacity:0.9});
+          svg.appendChild(pb2);
+        }
+        // Forecast portion
+        const fcast_x1 = tx(NOW), fcast_w = ax2 - fcast_x1;
+        if (fcast_w > 0) {
+          const fb = el('rect', {x:fcast_x1, y:ry+ayOff, width:fcast_w, height:BH,
+            fill:sc.fill, rx:3, opacity:0.3, stroke:sc.fill,
+            'stroke-width':1, 'stroke-dasharray':'3,2'});
+          svg.appendChild(fb);
+        }
+      } else {
+        const ab = el('rect', {x:ax1, y:ry+ayOff, width:aw, height:BH,
+          fill:sc.fill, rx:3, opacity: status==='scheduled'?0.3:0.82});
+        svg.appendChild(ab);
+      }
+
+      // Label inside bar
+      if (aw > 46) {
+        const cid = 'c'+job.id.replace('-','');
+        const cp = el('clipPath', {id:cid});
+        cp.appendChild(el('rect', {x:ax1+1, y:ry+ayOff, width:aw-2, height:BH}));
+        defs.appendChild(cp);
+        const tl = el('text', {x:ax1+5, y:ry+ayOff+BH/2+4, fill:'#f0f6fc',
+          'font-size':9, 'font-family':'Courier New,monospace',
+          'clip-path':`url(#${cid})`, 'font-weight':'bold', opacity:0.9});
+        tl.textContent = job.id;
+        svg.appendChild(tl);
+      }
+
+      // Variance indicator (chevron on right of actual bar if delayed)
+      if (variance > 2 && ax2 > px2) {
+        const arrow = el('text', {x:ax2+3, y:ry+ayOff+BH/2+4,
+          fill:sc.fill, 'font-size':9});
+        arrow.textContent = `+${Math.round(variance)}h`;
+        svg.appendChild(arrow);
+      }
+      if (variance < -2) {
+        const arrow = el('text', {x:Math.min(ax1,px1)+2, y:ry+ayOff-3,
+          fill:'#3fb950', 'font-size':8});
+        arrow.textContent = `${Math.round(variance)}h`;
+        svg.appendChild(arrow);
+      }
+
+      // Hover zone
+      const hx = Math.min(px1,ax1)-4, hx2 = Math.max(px2,ax2)+4;
+      const hz = el('rect', {x:hx, y:ry+2, width:hx2-hx, height:RH-4,
+        fill:'transparent', cursor:'pointer'});
+      hz.addEventListener('mouseenter', e => showTT(e, job, status, variance));
+      hz.addEventListener('mousemove', moveTT);
+      hz.addEventListener('mouseleave', hideTT);
+      svg.appendChild(hz);
+    });
+  });
+
+  // Label separator
+  svg.appendChild(el('line', {x1:LW, y1:0, x2:LW, y2:totalH,
+    stroke:'#30363d', 'stroke-width':1}));
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────────────────────────
+const tt = document.getElementById('tt');
+function showTT(e, job, status, variance) {
+  const sc = SC[status];
+  document.getElementById('tt-title').textContent = job.id + ' — ' + job.name;
+  const pe = new Date(job.pe), ps = new Date(job.ps);
+  const planHrs = (pe - ps) / 3600000;
+  const varStr = variance === 0 ? 'On Time'
+    : variance < 0 ? `${Math.abs(variance).toFixed(1)}h ahead`
+    : `+${variance.toFixed(1)}h behind`;
+  document.getElementById('tt-body').innerHTML = `
+    <div class="tt-row"><span class="tt-key">Machine</span><span class="tt-val">${job.m}</span></div>
+    <div class="tt-row"><span class="tt-key">Product</span><span class="tt-val">${job.prod}</span></div>
+    <div class="tt-row"><span class="tt-key">Operator</span><span class="tt-val">${job.op}</span></div>
+    <div class="tt-row"><span class="tt-key">Priority</span><span class="tt-val">${job.pri}</span></div>
+    <div class="tt-row"><span class="tt-key">Planned Start</span><span class="tt-val">${fmtDate(job.ps)}</span></div>
+    <div class="tt-row"><span class="tt-key">Planned End</span><span class="tt-val">${fmtDate(job.pe)}</span></div>
+    ${job.as ? `<div class="tt-row"><span class="tt-key">Actual Start</span><span class="tt-val">${fmtDate(job.as)}</span></div>` : ''}
+    ${job.ae ? `<div class="tt-row"><span class="tt-key">Actual End</span><span class="tt-val">${fmtDate(job.ae)}</span></div>` : ''}
+    ${job.fe && !job.ae ? `<div class="tt-row"><span class="tt-key">Forecast End</span><span class="tt-val">${fmtDate(job.fe)}</span></div>` : ''}
+    <div class="tt-row"><span class="tt-key">Plan Duration</span><span class="tt-val">${planHrs.toFixed(0)}h</span></div>
+    <div class="tt-row"><span class="tt-key">Variance</span><span class="tt-val" style="color:${sc.fill}">${varStr}</span></div>
+    <div><span class="tt-chip" style="background:${sc.light};color:${sc.text}">${sc.label}</span></div>
+    ${job.notes ? `<div style="margin-top:6px;font-size:10px;color:#8b949e;font-style:italic">${job.notes}</div>` : ''}
+  `;
+  tt.style.display = 'block';
+  moveTT(e);
+}
+function moveTT(e) {
+  const x = e.clientX + 16, y = e.clientY - 10;
+  const r = tt.getBoundingClientRect();
+  tt.style.left = (x + r.width > window.innerWidth - 10 ? e.clientX - r.width - 10 : x) + 'px';
+  tt.style.top  = (y + r.height > window.innerHeight - 10 ? e.clientY - r.height - 10 : y) + 'px';
+}
+function hideTT() { tt.style.display = 'none'; }
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'}) + ' ' +
+    d.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+// ── KPI RENDER ────────────────────────────────────────────────────────────────
+function renderKPIs(jobs) {
+  const completed = jobs.filter(j => j.ae);
+  const onTime = completed.filter(j => (new Date(j.ae)-new Date(j.pe))/3600000 <= 2);
+  const adherence = completed.length ? Math.round(onTime.length/completed.length*100) : 0;
+
+  const trouble = jobs.filter(j => {
+    const st = getStatus(j);
+    return ['delayed','in_progress_late','at_risk','completed_late'].includes(st);
+  });
+
+  const delayedActive = jobs.filter(j => {
+    const st = getStatus(j);
+    return ['delayed','in_progress_late'].includes(st);
+  });
+  const avgDelay = delayedActive.length
+    ? delayedActive.reduce((a,j) => a + Math.max(getVariance(j),0), 0) / delayedActive.length : 0;
+
+  const cnc2Jobs = jobs.filter(j => j.m==='CNC-02' && j.ae);
+  const cnc2Avg = cnc2Jobs.length
+    ? Math.abs(cnc2Jobs.reduce((a,j)=>a+getVariance(j),0)/cnc2Jobs.length) : 0;
+
+  document.getElementById('kpi-adhere').textContent = adherence + '%';
+  document.getElementById('kpi-adhere-sub').textContent = `${onTime.length}/${completed.length} completed jobs on time`;
+  document.getElementById('kpi-delayed').textContent = trouble.length;
+  document.getElementById('kpi-delayed-sub').textContent = `${delayedActive.length} active · ${jobs.filter(j=>getStatus(j)==='at_risk').length} at risk`;
+  document.getElementById('kpi-avgdelay').textContent = avgDelay.toFixed(1) + 'h';
+  document.getElementById('kpi-best').textContent = cnc2Avg.toFixed(1) + 'h';
+}
+
+// ── TROUBLE PANEL ─────────────────────────────────────────────────────────────
+function renderTrouble(jobs) {
+  const bad = jobs
+    .map(j => ({job:j, status:getStatus(j), v:getVariance(j)}))
+    .filter(x => x.v > 0 && !['scheduled','completed_ontime','completed_ahead'].includes(x.status))
+    .sort((a,b) => b.v - a.v)
+    .slice(0, 12);
+
+  const el2 = document.getElementById('trouble-list');
+  if (!bad.length) { el2.innerHTML = '<div style="padding:16px;font-size:12px;color:#8b949e;text-align:center">No delays in current filter</div>'; return; }
+
+  el2.innerHTML = bad.map(({job,status,v}) => {
+    const sc = SC[status];
+    const mach = MACHINES.find(m=>m.id===job.m);
+    return `<div class="t-item">
+      <div class="t-status" style="background:${sc.fill}"></div>
+      <div class="t-id" style="color:${sc.text}">${job.id}</div>
+      <div class="t-mach" style="color:${mach?.color||'#8b949e'}">${job.m}</div>
+      <div class="t-name" title="${job.name}">${job.name}</div>
+      <div class="t-var" style="color:${sc.fill}">+${v.toFixed(0)}h</div>
+    </div>`;
+  }).join('');
+}
+
+// ── UTILISATION ───────────────────────────────────────────────────────────────
+function renderUtil(jobs) {
+  const periodStart = CHART_START, periodEnd = NOW;
+  const availMs = periodEnd - periodStart;
+
+  const rows = MACHINES.map(mach => {
+    const mJobs = JOBS.filter(j => j.m === mach.id);
+    let usedMs = 0;
+    mJobs.forEach(j => {
+      const s = j.as ? new Date(j.as) : null;
+      const e = j.ae ? new Date(j.ae) : (j.as ? NOW : null);
+      if (!s) return;
+      const cs = Math.max(s, periodStart), ce = Math.min(e, periodEnd);
+      if (ce > cs) usedMs += ce - cs;
+    });
+    const pct = Math.round(Math.min(usedMs / availMs * 100, 100));
+    return {mach, pct};
+  });
+
+  document.getElementById('util-list').innerHTML = rows.map(({mach, pct}) => {
+    const col = pct > 85 ? '#3fb950' : pct > 60 ? '#58a6ff' : pct > 35 ? '#e3b341' : '#f85149';
+    return `<div class="util-row">
+      <div class="util-m" style="color:${mach.color}">${mach.id}</div>
+      <div class="util-bg"><div class="util-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="util-pct" style="color:${col}">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── FILTER SETUP ──────────────────────────────────────────────────────────────
+function setupFilters() {
+  const ms = document.getElementById('f-machine');
+  MACHINES.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.id; o.textContent = m.id + ' — ' + m.type;
+    ms.appendChild(o);
+  });
+  ['f-machine','f-status','f-priority'].forEach(id => {
+    document.getElementById(id).addEventListener('change', e => {
+      filters[id.slice(2)] = e.target.value;
+      refresh();
+    });
+  });
+}
+
+function resetFilters() {
+  filters = {machine:'', status:'', priority:''};
+  ['f-machine','f-status','f-priority'].forEach(id => document.getElementById(id).value='');
+  refresh();
+}
+
+function refresh() {
+  const jobs = filteredJobs();
+  document.getElementById('f-count').textContent = `Showing ${jobs.length} of ${JOBS.length} jobs`;
+  renderGantt(jobs);
+  renderKPIs(jobs);
+  renderTrouble(jobs);
+  renderUtil(jobs);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function updateClock() {
+  const n = NOW;
+  document.getElementById('clock').textContent =
+    '⬤ ' + n.toLocaleDateString('en-AU',{day:'2-digit',month:'short'}) + ' ' +
+    n.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+setupFilters();
+refresh();
+updateClock();
+window.addEventListener('resize', () => renderGantt(filteredJobs()));
+</script>
+</body>
+</html>
