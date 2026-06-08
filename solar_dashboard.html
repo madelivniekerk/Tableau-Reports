@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SolarPeak Energy — Sustainability Report 2025–2026</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0d0500;color:#fef3e2;min-height:100vh;display:flex}
+.main-content{flex:1;min-width:0;overflow-x:hidden}
+
+/* RIGHT IMAGE PANEL */
+.right-panel{width:270px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:hidden;border-left:1px solid #3d2500;display:flex;flex-direction:column}
+.right-panel svg{width:100%;height:100%;display:block;object-fit:cover}
+.panel-overlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;padding:20px 16px;pointer-events:none}
+.panel-top{display:flex;flex-direction:column;gap:8px}
+.panel-badge{font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#fbbf24;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);padding:3px 9px;border-radius:99px;display:inline-block;width:fit-content}
+.panel-loc{font-size:10px;color:#c4924a;margin-top:2px}
+.callout{background:rgba(13,5,0,.82);border:1px solid #3d2500;border-radius:10px;padding:10px 12px;backdrop-filter:blur(4px)}
+.callout-val{font-size:22px;font-weight:900;color:#fbbf24;letter-spacing:-.02em}
+.callout-lbl{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7a5530;margin-top:2px}
+.callout-sub{font-size:9px;color:#c4924a;margin-top:2px}
+.panel-mid{display:flex;flex-direction:column;gap:8px}
+.panel-bot{display:flex;flex-direction:column;gap:6px}
+.cam-meta{font-size:8px;color:#4a3520;font-family:'Courier New',monospace;background:rgba(13,5,0,.7);border-radius:6px;padding:6px 8px;line-height:1.6}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a0e00}
+::-webkit-scrollbar-thumb{background:#3d2500;border-radius:3px}
+
+/* HERO */
+.hero{position:relative;width:100%;overflow:hidden;border-bottom:1px solid #3d2500}
+.hero-content{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;padding:0 40px;gap:0}
+.hero-text{z-index:2}
+.hero-tag{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#fbbf24;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);padding:4px 12px;border-radius:99px;display:inline-block;margin-bottom:12px}
+.hero-title{font-size:32px;font-weight:900;letter-spacing:-.03em;line-height:1.1;color:#fef3e2;text-shadow:0 2px 20px rgba(0,0,0,.8)}
+.hero-title span{color:#fbbf24}
+.hero-sub{font-size:13px;color:#c4924a;margin-top:8px;letter-spacing:.04em}
+.hero-stats{display:flex;gap:24px;margin-top:16px}
+.hero-stat-val{font-size:22px;font-weight:800;color:#fbbf24}
+.hero-stat-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a5530;margin-top:2px}
+
+/* BANNER */
+.banner{display:flex;align-items:center;gap:10px;padding:8px 40px;background:rgba(163,230,53,.06);border-bottom:1px solid rgba(163,230,53,.15);font-size:12px;color:#a3e635;flex-wrap:wrap}
+.banner-dot{width:6px;height:6px;border-radius:50%;background:#a3e635;animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 40px 0}
+.kpi{background:#1a0e00;border:1px solid #3d2500;border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 14px 14px}
+.kpi.sol::after{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.kpi.lim::after{background:linear-gradient(90deg,#65a30d,#a3e635)}
+.kpi.sky::after{background:linear-gradient(90deg,#0284c7,#38bdf8)}
+.kpi.ora::after{background:linear-gradient(90deg,#c2410c,#fb923c)}
+.kpi-icon{font-size:22px;margin-bottom:10px;display:block}
+.kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#7a5530;margin-bottom:6px}
+.kpi-val{font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1}
+.kpi.sol .kpi-val{color:#fbbf24}
+.kpi.lim .kpi-val{color:#a3e635}
+.kpi.sky .kpi-val{color:#38bdf8}
+.kpi.ora .kpi-val{color:#fb923c}
+.kpi-sub{font-size:11px;color:#7a5530;margin-top:5px}
+.kpi-delta{font-size:10px;font-weight:700;margin-top:4px}
+.kpi-delta.up{color:#a3e635}
+.kpi-delta.dn{color:#f87171}
+
+/* MAIN */
+.section-hdr{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#7a5530;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-hdr::after{content:'';flex:1;height:1px;background:#3d2500}
+
+.main-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;padding:20px 40px 0}
+.chart-card{background:#1a0e00;border:1px solid #3d2500;border-radius:14px;padding:20px}
+.bottom-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;padding:20px 40px 32px}
+
+/* DONUT */
+.donut-wrap{display:flex;flex-direction:column;gap:16px}
+.donut-chart-wrap{position:relative;width:180px;height:180px;margin:0 auto}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-center-val{font-size:26px;font-weight:900;color:#fbbf24}
+.donut-center-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a5530}
+.donut-legend{display:flex;flex-direction:column;gap:8px}
+.dl-item{display:flex;align-items:center;gap:10px}
+.dl-sq{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.dl-lbl{font-size:11px;color:#c4924a;flex:1}
+.dl-val{font-size:12px;font-weight:700;font-family:'Courier New',monospace}
+.dl-pct{font-size:10px;color:#7a5530;font-family:'Courier New',monospace;width:32px;text-align:right}
+
+/* SCOPE */
+.scope-item{margin-bottom:14px}
+.scope-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.scope-name{font-size:11px;color:#c4924a;font-weight:600}
+.scope-vals{font-size:10px;font-family:'Courier New',monospace}
+.scope-track{height:8px;background:#261500;border-radius:4px;overflow:hidden;position:relative}
+.scope-bar{height:100%;border-radius:4px;transition:width .8s ease}
+.scope-baseline{position:absolute;top:0;height:100%;width:1px;background:#7a5530;opacity:.6}
+.scope-note{font-size:9px;color:#7a5530;margin-top:3px}
+
+/* ACHIEVEMENTS */
+.ach-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ach{background:#221400;border:1px solid #3d2500;border-radius:10px;padding:12px 14px}
+.ach-val{font-size:20px;font-weight:900;color:#fbbf24;letter-spacing:-.02em}
+.ach-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a5530;margin-top:3px}
+.ach-sub{font-size:10px;color:#c4924a;margin-top:2px}
+
+/* TOOLTIP */
+#tt{position:fixed;background:#1f1000;border:1px solid #3d2500;border-radius:10px;padding:12px 14px;font-size:12px;pointer-events:none;z-index:1000;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,.8);display:none}
+.tt-title{font-size:12px;font-weight:700;color:#fbbf24;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid #3d2500}
+.tt-row{display:flex;justify-content:space-between;gap:16px;margin-bottom:3px}
+.tt-key{color:#7a5530;font-size:11px}
+.tt-val{font-weight:700;font-family:'Courier New',monospace;font-size:11px;color:#fef3e2}
+</style>
+</head>
+<body>
+
+<div class="main-content">
+<!-- ── HERO ───────────────────────────────────────────────────────────────────── -->
+<div class="hero">
+<svg viewBox="0 0 1200 220" width="100%" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d0200"/>
+      <stop offset="55%" stop-color="#5c1a00"/>
+      <stop offset="82%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <radialGradient id="sun-g" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="35%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.6"/>
+    </radialGradient>
+    <radialGradient id="sun-halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow-lg"><feGaussianBlur stdDeviation="18" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-sm"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <clipPath id="hero-clip"><rect width="1200" height="220"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#hero-clip)">
+    <!-- Sky -->
+    <rect width="1200" height="220" fill="url(#sky)"/>
+
+    <!-- Stars (faint dots in upper sky) -->
+    <circle cx="120" cy="22" r="1" fill="#fef3e2" opacity=".4"/>
+    <circle cx="245" cy="14" r="1.2" fill="#fef3e2" opacity=".5"/>
+    <circle cx="58" cy="38" r=".8" fill="#fef3e2" opacity=".35"/>
+    <circle cx="340" cy="8" r="1" fill="#fef3e2" opacity=".4"/>
+    <circle cx="195" cy="42" r=".7" fill="#fef3e2" opacity=".3"/>
+    <circle cx="420" cy="18" r=".9" fill="#fef3e2" opacity=".35"/>
+    <circle cx="510" cy="30" r="1.1" fill="#fef3e2" opacity=".25"/>
+    <circle cx="88" cy="60" r=".8" fill="#fef3e2" opacity=".2"/>
+
+    <!-- Sun halo -->
+    <circle cx="870" cy="195" r="110" fill="url(#sun-halo)" filter="url(#glow-lg)"/>
+
+    <!-- Sun rays -->
+    <g transform="translate(870,195)" stroke="#fef08a" stroke-linecap="round" opacity=".55">
+      <line x1="0" y1="-78" x2="0" y2="-105" stroke-width="2.5"/>
+      <line x1="55" y1="-55" x2="74" y2="-74" stroke-width="2"/>
+      <line x1="78" y1="0" x2="105" y2="0" stroke-width="2.5"/>
+      <line x1="55" y1="55" x2="74" y2="74" stroke-width="2"/>
+      <line x1="-55" y1="-55" x2="-74" y2="-74" stroke-width="2"/>
+      <line x1="-78" y1="0" x2="-105" y2="0" stroke-width="2.5"/>
+      <line x1="-55" y1="55" x2="-74" y2="74" stroke-width="2"/>
+      <line x1="38" y1="-68" x2="51" y2="-92" stroke-width="1.5"/>
+      <line x1="-38" y1="-68" x2="-51" y2="-92" stroke-width="1.5"/>
+      <line x1="68" y1="38" x2="92" y2="51" stroke-width="1.5"/>
+      <line x1="-68" y1="38" x2="-92" y2="51" stroke-width="1.5"/>
+      <line x1="68" y1="-38" x2="92" y2="-51" stroke-width="1.5"/>
+      <line x1="-68" y1="-38" x2="-92" y2="-51" stroke-width="1.5"/>
+    </g>
+
+    <!-- Sun -->
+    <circle cx="870" cy="195" r="48" fill="url(#sun-g)" filter="url(#glow-sm)"/>
+    <circle cx="870" cy="195" r="35" fill="#fffbeb" opacity=".9"/>
+
+    <!-- Horizon glow band -->
+    <rect x="0" y="188" width="1200" height="8" fill="#fbbf24" opacity=".25"/>
+
+    <!-- Far mountains / hills -->
+    <path d="M0,175 Q80,130 180,155 Q280,178 380,142 Q480,108 580,138 Q660,162 720,138 Q780,115 830,135 L830,220 L0,220 Z" fill="#1c0800" opacity=".85"/>
+    <path d="M680,155 Q730,120 780,138 Q820,152 870,132 Q920,113 970,128 Q1030,145 1100,118 Q1150,100 1200,110 L1200,220 L680,220 Z" fill="#140600" opacity=".9"/>
+
+    <!-- Near ground -->
+    <path d="M0,200 Q300,190 600,198 Q900,206 1200,196 L1200,220 L0,220 Z" fill="#0d0400"/>
+
+    <!-- Wind turbine silhouette (left side) -->
+    <g transform="translate(195,95)" opacity=".5" fill="#0d0400">
+      <rect x="-1.5" y="0" width="3" height="105" rx="1"/>
+      <rect x="-1" y="-2" width="2" height="38" rx="1" transform="rotate(0)"/>
+      <rect x="-1" y="-2" width="2" height="38" rx="1" transform="rotate(120)"/>
+      <rect x="-1" y="-2" width="2" height="38" rx="1" transform="rotate(240)"/>
+      <circle cx="0" cy="0" r="3"/>
+    </g>
+    <g transform="translate(145,112)" opacity=".35" fill="#0d0400">
+      <rect x="-1" y="0" width="2" height="72" rx="1"/>
+      <rect x="-.7" y="-1.5" width="1.4" height="26" rx="1" transform="rotate(30)"/>
+      <rect x="-.7" y="-1.5" width="1.4" height="26" rx="1" transform="rotate(150)"/>
+      <rect x="-.7" y="-1.5" width="1.4" height="26" rx="1" transform="rotate(270)"/>
+      <circle cx="0" cy="0" r="2"/>
+    </g>
+
+    <!-- Solar panel field - perspective grid -->
+    <!-- Row 4 (furthest) -->
+    <g transform="translate(560,154)" opacity=".7">
+      <g fill="#0f2744" stroke="#1e4a7a" stroke-width=".4">
+        <path d="M0,0 L18,0 L20,10 L2,10 Z"/><path d="M20,0 L38,0 L40,10 L22,10 Z"/>
+        <path d="M40,0 L58,0 L60,10 L42,10 Z"/><path d="M60,0 L78,0 L80,10 L62,10 Z"/>
+        <path d="M80,0 L98,0 L100,10 L82,10 Z"/><path d="M100,0 L118,0 L120,10 L102,10 Z"/>
+        <path d="M120,0 L138,0 L140,10 L122,10 Z"/>
+      </g>
+      <g stroke="#fbbf24" stroke-width=".3" opacity=".25">
+        <line x1="0" y1="5" x2="140" y2="5"/>
+        <line x1="20" y1="0" x2="22" y2="10"/><line x1="40" y1="0" x2="42" y2="10"/>
+        <line x1="60" y1="0" x2="62" y2="10"/><line x1="80" y1="0" x2="82" y2="10"/>
+        <line x1="100" y1="0" x2="102" y2="10"/><line x1="120" y1="0" x2="122" y2="10"/>
+      </g>
+    </g>
+    <!-- Row 3 -->
+    <g transform="translate(530,165)" opacity=".8">
+      <g fill="#0f2a4a" stroke="#1e4a82" stroke-width=".5">
+        <path d="M0,0 L22,0 L25,13 L3,13 Z"/><path d="M25,0 L47,0 L50,13 L28,13 Z"/>
+        <path d="M50,0 L72,0 L75,13 L53,13 Z"/><path d="M75,0 L97,0 L100,13 L78,13 Z"/>
+        <path d="M100,0 L122,0 L125,13 L103,13 Z"/><path d="M125,0 L147,0 L150,13 L128,13 Z"/>
+        <path d="M150,0 L172,0 L175,13 L153,13 Z"/>
+      </g>
+      <g stroke="#fbbf24" stroke-width=".4" opacity=".3">
+        <line x1="0" y1="6.5" x2="175" y2="6.5"/>
+        <line x1="25" y1="0" x2="28" y2="13"/><line x1="50" y1="0" x2="53" y2="13"/>
+        <line x1="75" y1="0" x2="78" y2="13"/><line x1="100" y1="0" x2="103" y2="13"/>
+        <line x1="125" y1="0" x2="128" y2="13"/><line x1="150" y1="0" x2="153" y2="13"/>
+      </g>
+    </g>
+    <!-- Row 2 -->
+    <g transform="translate(498,179)" opacity=".9">
+      <g fill="#102e52" stroke="#1e528a" stroke-width=".6">
+        <path d="M0,0 L27,0 L31,16 L4,16 Z"/><path d="M31,0 L58,0 L62,16 L35,16 Z"/>
+        <path d="M62,0 L89,0 L93,16 L66,16 Z"/><path d="M93,0 L120,0 L124,16 L97,16 Z"/>
+        <path d="M124,0 L151,0 L155,16 L128,16 Z"/><path d="M155,0 L182,0 L186,16 L159,16 Z"/>
+        <path d="M186,0 L213,0 L217,16 L190,16 Z"/>
+      </g>
+      <g stroke="#fbbf24" stroke-width=".5" opacity=".35">
+        <line x1="0" y1="8" x2="217" y2="8"/>
+        <line x1="31" y1="0" x2="35" y2="16"/><line x1="62" y1="0" x2="66" y2="16"/>
+        <line x1="93" y1="0" x2="97" y2="16"/><line x1="124" y1="0" x2="128" y2="16"/>
+        <line x1="155" y1="0" x2="159" y2="16"/><line x1="186" y1="0" x2="190" y2="16"/>
+      </g>
+    </g>
+    <!-- Row 1 (closest, catching sunlight) -->
+    <g transform="translate(462,196)">
+      <g fill="#112f55" stroke="#1e5a96" stroke-width=".7">
+        <path d="M0,0 L33,0 L38,20 L5,20 Z"/><path d="M38,0 L71,0 L76,20 L43,20 Z"/>
+        <path d="M76,0 L109,0 L114,20 L81,20 Z"/><path d="M114,0 L147,0 L152,20 L119,20 Z"/>
+        <path d="M152,0 L185,0 L190,20 L157,20 Z"/><path d="M190,0 L223,0 L228,20 L195,20 Z"/>
+        <path d="M228,0 L261,0 L266,20 L233,20 Z"/>
+      </g>
+      <!-- Sunlight glint on nearest panels -->
+      <g fill="#fbbf24" opacity=".12">
+        <path d="M152,0 L185,0 L190,20 L157,20 Z"/><path d="M190,0 L223,0 L228,20 L195,20 Z"/>
+      </g>
+      <g stroke="#38bdf8" stroke-width=".6" opacity=".4">
+        <line x1="0" y1="10" x2="266" y2="10"/>
+        <line x1="38" y1="0" x2="43" y2="20"/><line x1="76" y1="0" x2="81" y2="20"/>
+        <line x1="114" y1="0" x2="119" y2="20"/><line x1="152" y1="0" x2="157" y2="20"/>
+        <line x1="190" y1="0" x2="195" y2="20"/><line x1="228" y1="0" x2="233" y2="20"/>
+      </g>
+    </g>
+
+    <!-- Power lines -->
+    <g stroke="#3d2500" stroke-width="1" opacity=".5" fill="none">
+      <line x1="310" y1="120" x2="460" y2="178"/>
+      <line x1="310" y1="120" x2="160" y2="148"/>
+      <circle cx="310" cy="118" r="3" fill="#3d2500"/>
+    </g>
+  </g>
+</svg>
+
+<div class="hero-content">
+  <div class="hero-text">
+    <div class="hero-tag">☀ Sustainability Report</div>
+    <div class="hero-title">Solar<span>Peak</span> Energy</div>
+    <div class="hero-sub">FY 2025 — 2026 · Renewable Generation & Carbon Impact</div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-val">7,368</div><div class="hero-stat-lbl">MWh Generated 2025</div></div>
+      <div style="width:1px;background:#3d2500"></div>
+      <div><div class="hero-stat-val">2,771t</div><div class="hero-stat-lbl">CO₂ Avoided 2025</div></div>
+      <div style="width:1px;background:#3d2500"></div>
+      <div><div class="hero-stat-val">89%</div><div class="hero-stat-lbl">Grid Independence</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── BANNER ──────────────────────────────────────────────────────────────────── -->
+<div class="banner">
+  <div class="banner-dot"></div>
+  <strong>Record Month:</strong>&nbsp;November 2025 — 697 MWh generated, 123% capacity, 306 tonnes CO₂ avoided — best performance in company history.
+</div>
+
+<!-- ── KPI CARDS ──────────────────────────────────────────────────────────────── -->
+<div class="kpi-row">
+  <div class="kpi sol">
+    <span class="kpi-icon">☀</span>
+    <div class="kpi-lbl">Solar Generation — 2025</div>
+    <div class="kpi-val">4,747</div>
+    <div class="kpi-sub">MWh from photovoltaic arrays</div>
+    <div class="kpi-delta up">↑ 18% vs 2024 baseline</div>
+  </div>
+  <div class="kpi lim">
+    <span class="kpi-icon">🌿</span>
+    <div class="kpi-lbl">CO₂ Avoided — 2025</div>
+    <div class="kpi-val">2,771</div>
+    <div class="kpi-sub">tonnes — equiv. 601 cars off road</div>
+    <div class="kpi-delta up">↑ 22% vs 2024 baseline</div>
+  </div>
+  <div class="kpi sky">
+    <span class="kpi-icon">💧</span>
+    <div class="kpi-lbl">Cost Savings — 2025</div>
+    <div class="kpi-val">$755k</div>
+    <div class="kpi-sub">AUD vs full grid dependency</div>
+    <div class="kpi-delta up">↑ 31% vs 2024</div>
+  </div>
+  <div class="kpi ora">
+    <span class="kpi-icon">⚡</span>
+    <div class="kpi-lbl">Peak Capacity Hit</div>
+    <div class="kpi-val">123%</div>
+    <div class="kpi-sub">Nov 2025 — excess fed to grid</div>
+    <div class="kpi-delta up">↑ 18pp above design spec</div>
+  </div>
+</div>
+
+<!-- ── MAIN: BAR CHART + DONUT ────────────────────────────────────────────────── -->
+<div class="main-grid" style="padding-top:24px">
+  <div class="chart-card">
+    <div class="section-hdr">Monthly Energy Generation (MWh)</div>
+    <div style="overflow-x:auto"><svg id="bar-svg" style="display:block"></svg></div>
+    <div style="display:flex;gap:18px;margin-top:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#c4924a">
+        <div style="width:10px;height:10px;border-radius:2px;background:#fbbf24"></div>Solar
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#c4924a">
+        <div style="width:10px;height:10px;border-radius:2px;background:#a3e635"></div>Wind
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#c4924a">
+        <div style="width:10px;height:10px;border-radius:2px;background:#334155"></div>Grid
+      </div>
+      <div style="margin-left:auto;font-size:10px;color:#7a5530;font-style:italic">* Jun 2026 partial (to 8 Jun)</div>
+    </div>
+  </div>
+  <div class="chart-card donut-wrap">
+    <div class="section-hdr">2025 Energy Mix</div>
+    <div class="donut-chart-wrap">
+      <svg id="donut-svg" width="180" height="180" style="display:block"></svg>
+      <div class="donut-center">
+        <div class="donut-center-val">89%</div>
+        <div class="donut-center-lbl">Renewable</div>
+      </div>
+    </div>
+    <div class="donut-legend" id="donut-legend"></div>
+    <div style="margin-top:14px;padding:12px 14px;background:#221400;border-radius:10px;border:1px solid #3d2500">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7a5530;margin-bottom:6px">2026 YTD Target</div>
+      <div style="font-size:13px;font-weight:800;color:#fbbf24">3,624 <span style="font-size:11px;font-weight:400;color:#c4924a">MWh</span></div>
+      <div style="height:6px;background:#261500;border-radius:3px;margin-top:7px;overflow:hidden">
+        <div style="height:100%;width:68%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px"></div>
+      </div>
+      <div style="font-size:10px;color:#7a5530;margin-top:4px">68% of annual target reached (Jun 8)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTTOM: CO2 LINE + ACHIEVEMENTS + SCOPE ──────────────────────────────── -->
+<div class="bottom-grid">
+  <div class="chart-card">
+    <div class="section-hdr">Monthly CO₂ Savings Trend (tonnes)</div>
+    <svg id="line-svg" style="display:block;width:100%"></svg>
+    <div style="display:flex;gap:18px;margin-top:10px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#c4924a">
+        <div style="width:16px;height:2px;background:#a3e635"></div>Actual savings
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#c4924a">
+        <svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,2"/></svg>Target 250t/month
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="chart-card">
+      <div class="section-hdr">2025 Highlights</div>
+      <div class="ach-grid">
+        <div class="ach">
+          <div class="ach-val">42.1</div>
+          <div class="ach-lbl">Peak Day MWh</div>
+          <div class="ach-sub">14 Nov 2025</div>
+        </div>
+        <div class="ach">
+          <div class="ach-val">47</div>
+          <div class="ach-lbl">Grid-Free Days</div>
+          <div class="ach-sub">12.9% of year</div>
+        </div>
+        <div class="ach">
+          <div class="ach-val" style="color:#a3e635">1,832</div>
+          <div class="ach-lbl">Wind MWh</div>
+          <div class="ach-sub">25% of mix</div>
+        </div>
+        <div class="ach">
+          <div class="ach-val" style="color:#38bdf8">601</div>
+          <div class="ach-lbl">Cars Equivalent</div>
+          <div class="ach-sub">CO₂ removed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="section-hdr">Scope Emissions 2025</div>
+      <div id="scope-list"></div>
+      <div style="margin-top:10px;padding:8px 10px;background:#221400;border-radius:8px;font-size:10px;color:#7a5530;text-align:center">
+        Total: <strong style="color:#fb923c">443 tCO₂e</strong> vs 1,085t baseline — <strong style="color:#a3e635">59% reduction</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tt"><div class="tt-title" id="tt-title"></div><div id="tt-body"></div></div>
+</div><!-- end .main-content -->
+
+<!-- ── RIGHT IMAGE PANEL ──────────────────────────────────────────────────────── -->
+<div class="right-panel">
+<img src="Wind%20Turbine.jpg" style="position:absolute;width:100%;height:100%;object-fit:cover;object-position:center top;display:block;"/>
+
+<div class="panel-overlay">
+  <div class="panel-top">
+    <div class="panel-badge">💨 Wind Farm — Site Bravo</div>
+    <div class="panel-loc">Snowtown, SA · 33.8°S 138.2°E</div>
+  </div>
+  <div class="panel-mid" style="margin-top:auto;margin-bottom:32px">
+    <div class="callout">
+      <div class="callout-val">3.6 MW</div>
+      <div class="callout-lbl">Turbine Rating</div>
+      <div class="callout-sub">14 units · 50.4 MW total</div>
+    </div>
+    <div class="callout">
+      <div class="callout-val" style="color:#a3e635">12.4</div>
+      <div class="callout-lbl">Avg Wind Speed (m/s)</div>
+      <div class="callout-sub">2025 annual average</div>
+    </div>
+    <div class="callout">
+      <div class="callout-val" style="color:#38bdf8">120m</div>
+      <div class="callout-lbl">Hub Height</div>
+      <div class="callout-sub">117m rotor diameter</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const DATA = [
+  {m:1,y:2025,lbl:'Jan 25',sol:312,wind:145,grid:89,co2:198,cost:52400,cap:71,peak:18.4},
+  {m:2,y:2025,lbl:'Feb 25',sol:298,wind:162,grid:76,co2:191,cost:50800,cap:68,peak:17.1},
+  {m:3,y:2025,lbl:'Mar 25',sol:356,wind:138,grid:68,co2:213,cost:56200,cap:81,peak:22.3},
+  {m:4,y:2025,lbl:'Apr 25',sol:421,wind:119,grid:52,co2:237,cost:62800,cap:96,peak:28.7},
+  {m:5,y:2025,lbl:'May 25',sol:387,wind:143,grid:61,co2:223,cost:59400,cap:88,peak:24.1},
+  {m:6,y:2025,lbl:'Jun 25',sol:298,wind:187,grid:84,co2:181,cost:52900,cap:68,peak:15.2},
+  {m:7,y:2025,lbl:'Jul 25',sol:312,wind:201,grid:91,co2:189,cost:55100,cap:71,peak:16.8},
+  {m:8,y:2025,lbl:'Aug 25',sol:376,wind:178,grid:73,co2:214,cost:61200,cap:86,peak:21.9},
+  {m:9,y:2025,lbl:'Sep 25',sol:448,wind:156,grid:58,co2:252,cost:69800,cap:102,peak:31.2},
+  {m:10,y:2025,lbl:'Oct 25',sol:512,wind:134,grid:44,co2:290,cost:78400,cap:117,peak:38.6},
+  {m:11,y:2025,lbl:'Nov 25',sol:538,wind:121,grid:38,co2:306,cost:82100,cap:123,peak:42.1},
+  {m:12,y:2025,lbl:'Dec 25',sol:489,wind:148,grid:55,co2:277,cost:74600,cap:112,peak:35.8},
+  {m:1,y:2026,lbl:'Jan 26',sol:334,wind:158,grid:71,co2:212,cost:57200,cap:76,peak:19.8},
+  {m:2,y:2026,lbl:'Feb 26',sol:321,wind:171,grid:64,co2:204,cost:55800,cap:73,peak:18.3},
+  {m:3,y:2026,lbl:'Mar 26',sol:398,wind:149,grid:55,co2:239,cost:64100,cap:91,peak:25.7},
+  {m:4,y:2026,lbl:'Apr 26',sol:467,wind:128,grid:41,co2:270,cost:72400,cap:107,peak:32.4},
+  {m:5,y:2026,lbl:'May 26',sol:431,wind:144,grid:47,co2:244,cost:67800,cap:98,peak:27.8},
+  {m:6,y:2026,lbl:'Jun 26*',sol:156,wind:67,grid:23,co2:89,cost:28200,cap:71,peak:12.1,partial:true}
+];
+
+const SCOPE = [
+  {name:'Scope 1 — Direct (vehicles, generators)', val:42, base:58, col:'#fb923c'},
+  {name:'Scope 2 — Grid electricity purchased',    val:89, base:680, col:'#fbbf24'},
+  {name:'Scope 3 — Supply chain & materials',      val:312,base:347, col:'#a3e635'}
+];
+
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag,attrs,txt){
+  const e=document.createElementNS(NS,tag);
+  for(const[k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  if(txt!==undefined) e.textContent=txt;
+  return e;
+}
+
+const tt = document.getElementById('tt');
+function showTT(e,title,rows){
+  document.getElementById('tt-title').textContent=title;
+  document.getElementById('tt-body').innerHTML=rows.map(r=>
+    `<div class="tt-row"><span class="tt-key">${r[0]}</span><span class="tt-val" style="color:${r[2]||'#fef3e2'}">${r[1]}</span></div>`
+  ).join('');
+  tt.style.display='block';
+  moveTT(e);
+}
+function moveTT(e){
+  const r=tt.getBoundingClientRect();
+  const x=e.clientX+16,y=e.clientY-10;
+  tt.style.left=(x+r.width>window.innerWidth-10?e.clientX-r.width-10:x)+'px';
+  tt.style.top=(y+r.height>window.innerHeight-10?e.clientY-r.height-10:y)+'px';
+}
+function hideTT(){tt.style.display='none';}
+
+// ── STACKED BAR CHART ─────────────────────────────────────────────────────────
+function renderBars(){
+  const svg=document.getElementById('bar-svg');
+  const W=svg.parentElement.clientWidth-2||700;
+  const H=240, ML=44, MB=32, MT=16, MR=8;
+  const PW=W-ML-MR, PH=H-MB-MT;
+  const n=DATA.length;
+  const maxTotal=Math.max(...DATA.map(d=>d.sol+d.wind+d.grid));
+  const BW=Math.max((PW/n)-4,8), gap=(PW-(BW*n))/(n+1);
+
+  svg.setAttribute('width',W); svg.setAttribute('height',H); svg.innerHTML='';
+  svg.appendChild(el('rect',{x:0,y:0,width:W,height:H,fill:'#1a0e00'}));
+
+  // Y grid
+  [0,200,400,600,800].forEach(v=>{
+    if(v>maxTotal+50) return;
+    const y=MT+PH-(v/maxTotal)*PH;
+    svg.appendChild(el('line',{x1:ML,y1:y,x2:ML+PW,y2:y,stroke:'#2a1500','stroke-width':1}));
+    svg.appendChild(el('text',{x:ML-4,y:y+4,fill:'#7a5530','font-size':9,'font-family':'Courier New,monospace','text-anchor':'end'},v));
+  });
+
+  // Year separator (between Dec 25 and Jan 26)
+  const sepIdx=12;
+  const sepX=ML+gap*(sepIdx+1)+BW*sepIdx+BW/2-gap/2;
+  svg.appendChild(el('line',{x1:sepX,y1:MT,x2:sepX,y2:MT+PH,stroke:'#3d2500','stroke-width':1,'stroke-dasharray':'4,3'}));
+  svg.appendChild(el('text',{x:sepX+4,y:MT+10,fill:'#7a5530','font-size':8,'font-family':'Courier New,monospace'},'2026 →'));
+
+  // Bars
+  DATA.forEach((d,i)=>{
+    const x=ML+gap*(i+1)+BW*i;
+    const total=d.sol+d.wind+d.grid;
+    const segments=[
+      {val:d.grid,col:'#1e293b'},
+      {val:d.wind,col:'#65a30d'},
+      {val:d.sol, col:'#d97706'}
+    ];
+    let yBase=MT+PH;
+    segments.forEach(s=>{
+      const bh=(s.val/maxTotal)*PH;
+      const rect=el('rect',{x,y:yBase-bh,width:BW,height:bh,fill:s.col,rx:0,opacity:d.partial?0.55:0.9});
+      rect.addEventListener('mouseenter',e=>showTT(e,`${d.lbl} — ${total} MWh`,[
+        ['Solar',d.sol+' MWh','#fbbf24'],
+        ['Wind',d.wind+' MWh','#a3e635'],
+        ['Grid',d.grid+' MWh','#64748b'],
+        ['CO₂ Saved',d.co2+' t','#a3e635'],
+        ['Cost Saved','$'+d.cost.toLocaleString(),'#38bdf8'],
+        ['Peak Day',d.peak+' MWh','#fbbf24'],
+        ['Capacity',d.cap+'%',d.cap>=100?'#a3e635':'#fb923c']
+      ]));
+      rect.addEventListener('mousemove',moveTT);
+      rect.addEventListener('mouseleave',hideTT);
+      svg.appendChild(rect);
+      yBase-=bh;
+    });
+    // Capacity marker dot
+    const capY=MT+PH-(d.cap/140)*PH*0.6;
+    if(d.cap>=100){
+      svg.appendChild(el('circle',{cx:x+BW/2,cy:Math.max(capY,MT+4),r:2.5,fill:'#fbbf24',opacity:0.8}));
+    }
+    // X label
+    svg.appendChild(el('text',{x:x+BW/2,y:H-MB+14,fill:d.partial?'#5a3a20':'#7a5530','font-size':8,'font-family':'Courier New,monospace','text-anchor':'middle'},d.lbl));
+  });
+
+  svg.appendChild(el('line',{x1:ML,y1:MT,x2:ML,y2:MT+PH,stroke:'#3d2500','stroke-width':1}));
+  svg.appendChild(el('line',{x1:ML,y1:MT+PH,x2:ML+PW,y2:MT+PH,stroke:'#3d2500','stroke-width':1}));
+}
+
+// ── DONUT CHART ───────────────────────────────────────────────────────────────
+function polarXY(cx,cy,r,deg){
+  const rad=(deg-90)*Math.PI/180;
+  return {x:cx+r*Math.cos(rad),y:cy+r*Math.sin(rad)};
+}
+function arcPath(cx,cy,r,ir,a1,a2){
+  const s=polarXY(cx,cy,r,a1),e=polarXY(cx,cy,r,a2);
+  const is=polarXY(cx,cy,ir,a2),ie=polarXY(cx,cy,ir,a1);
+  const lg=a2-a1>180?1:0;
+  return `M${s.x},${s.y} A${r},${r} 0 ${lg} 1 ${e.x},${e.y} L${is.x},${is.y} A${ir},${ir} 0 ${lg} 0 ${ie.x},${ie.y} Z`;
+}
+
+function renderDonut(){
+  const svg=document.getElementById('donut-svg');
+  svg.innerHTML='';
+  svg.appendChild(el('rect',{x:0,y:0,width:180,height:180,fill:'#1a0e00',rx:0}));
+  const cx=90,cy=90,r=78,ir=54;
+  const total2025=DATA.filter(d=>d.y===2025).reduce((a,d)=>a+d.sol+d.wind+d.grid,0);
+  const sol2025=DATA.filter(d=>d.y===2025).reduce((a,d)=>a+d.sol,0);
+  const wind2025=DATA.filter(d=>d.y===2025).reduce((a,d)=>a+d.wind,0);
+  const grid2025=DATA.filter(d=>d.y===2025).reduce((a,d)=>a+d.grid,0);
+  const segs=[
+    {val:sol2025, col:'#d97706', label:'Solar',fill:'#fbbf24'},
+    {val:wind2025,col:'#65a30d', label:'Wind', fill:'#a3e635'},
+    {val:grid2025,col:'#1e3a5f', label:'Grid', fill:'#334155'}
+  ];
+  let angle=-5;
+  segs.forEach(s=>{
+    const sweep=(s.val/total2025)*360;
+    const path=el('path',{d:arcPath(cx,cy,r,ir,angle,angle+sweep),fill:s.col,opacity:0.88,cursor:'pointer'});
+    path.addEventListener('mouseenter',e=>showTT(e,s.label+' 2025',[
+      ['Generation',s.val+' MWh',s.fill],
+      ['Share',((s.val/total2025)*100).toFixed(1)+'%',s.fill]
+    ]));
+    path.addEventListener('mousemove',moveTT);
+    path.addEventListener('mouseleave',hideTT);
+    svg.appendChild(path);
+    angle+=sweep;
+  });
+  // track ring
+  svg.appendChild(el('circle',{cx,cy,r:ir-2,fill:'#1a0e00'}));
+
+  // Legend
+  const legend=document.getElementById('donut-legend');
+  legend.innerHTML=segs.map(s=>`
+    <div class="dl-item">
+      <div class="dl-sq" style="background:${s.col}"></div>
+      <div class="dl-lbl">${s.label}</div>
+      <div class="dl-val" style="color:${s.fill}">${s.val.toLocaleString()}</div>
+      <div class="dl-pct">${((s.val/total2025)*100).toFixed(0)}%</div>
+    </div>`).join('');
+}
+
+// ── CO2 LINE CHART ────────────────────────────────────────────────────────────
+function renderLine(){
+  const container=document.getElementById('line-svg');
+  const W=container.parentElement.clientWidth-42||420;
+  const H=185, ML=42, MB=28, MT=14, MR=10;
+  const PW=W-ML-MR, PH=H-MB-MT;
+  const vals=DATA.map(d=>d.co2);
+  const maxV=Math.max(...vals)+30;
+  const target=250;
+  const n=DATA.length;
+
+  container.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  container.setAttribute('height',H);
+  container.innerHTML='';
+
+  function lx(i){return ML+(i/(n-1))*PW;}
+  function ly(v){return MT+PH-(v/maxV)*PH;}
+
+  // Grid
+  [0,100,200,300].forEach(v=>{
+    if(v>maxV) return;
+    const y=ly(v);
+    container.appendChild(el('line',{x1:ML,y1:y,x2:ML+PW,y2:y,stroke:'#2a1500','stroke-width':1}));
+    container.appendChild(el('text',{x:ML-4,y:y+4,fill:'#7a5530','font-size':8,'font-family':'Courier New,monospace','text-anchor':'end'},v+'t'));
+  });
+
+  // Target line
+  container.appendChild(el('line',{x1:ML,y1:ly(target),x2:ML+PW,y2:ly(target),
+    stroke:'#fbbf24','stroke-width':1,'stroke-dasharray':'5,3',opacity:0.5}));
+
+  // Area fill under actual line
+  const pts=DATA.map((d,i)=>`${lx(i)},${ly(d.co2)}`).join(' ');
+  const areaPath=`M${lx(0)},${ly(vals[0])} `+DATA.slice(1).map((d,i)=>`L${lx(i+1)},${ly(d.co2)}`).join(' ')+` L${lx(n-1)},${MT+PH} L${lx(0)},${MT+PH} Z`;
+  const defs=el('defs',{});
+  const grad=el('linearGradient',{id:'area-grad',x1:'0',y1:'0',x2:'0',y2:'1'});
+  grad.appendChild(el('stop',{'offset':'0%','stop-color':'#a3e635','stop-opacity':'0.3'}));
+  grad.appendChild(el('stop',{'offset':'100%','stop-color':'#a3e635','stop-opacity':'0'}));
+  defs.appendChild(grad);
+  container.appendChild(defs);
+  container.appendChild(el('path',{d:areaPath,fill:'url(#area-grad)'}));
+
+  // Line
+  container.appendChild(el('polyline',{points:pts,fill:'none',stroke:'#a3e635','stroke-width':2}));
+
+  // Dots + hover zones
+  DATA.forEach((d,i)=>{
+    container.appendChild(el('circle',{cx:lx(i),cy:ly(d.co2),r:3.5,fill:'#a3e635',
+      stroke:'#0d0500','stroke-width':1.5}));
+    const hz=el('rect',{x:lx(i)-12,y:MT,width:24,height:PH,fill:'transparent',cursor:'pointer'});
+    hz.addEventListener('mouseenter',e=>showTT(e,`${d.lbl} — CO₂ Savings`,[
+      ['CO₂ Avoided',d.co2+' t','#a3e635'],
+      ['vs Target',(d.co2>=target?'+ '+(d.co2-target):'– '+(target-d.co2))+'t',d.co2>=target?'#a3e635':'#f87171'],
+      ['Total MWh',(d.sol+d.wind+d.grid)+' MWh','#fbbf24'],
+      ['Cost Saved','$'+d.cost.toLocaleString(),'#38bdf8']
+    ]));
+    hz.addEventListener('mousemove',moveTT);
+    hz.addEventListener('mouseleave',hideTT);
+    container.appendChild(hz);
+
+    // X labels (every other)
+    if(i%2===0||i===DATA.length-1){
+      container.appendChild(el('text',{x:lx(i),y:H-MB+12,fill:'#7a5530','font-size':7.5,
+        'font-family':'Courier New,monospace','text-anchor':'middle'},d.lbl));
+    }
+  });
+
+  container.appendChild(el('line',{x1:ML,y1:MT,x2:ML,y2:MT+PH,stroke:'#3d2500','stroke-width':1}));
+  container.appendChild(el('line',{x1:ML,y1:MT+PH,x2:ML+PW,y2:MT+PH,stroke:'#3d2500','stroke-width':1}));
+}
+
+// ── SCOPE EMISSIONS ───────────────────────────────────────────────────────────
+function renderScope(){
+  const container=document.getElementById('scope-list');
+  const maxBase=Math.max(...SCOPE.map(s=>s.base));
+  container.innerHTML=SCOPE.map(s=>{
+    const pct=Math.round((s.val/s.base)*100);
+    const basePct=Math.round((s.base/maxBase)*100);
+    const valPct=Math.round((s.val/maxBase)*100);
+    const redPct=100-pct;
+    return `<div class="scope-item">
+      <div class="scope-header">
+        <div class="scope-name">${s.name}</div>
+        <div class="scope-vals" style="color:${s.col}">${s.val}t <span style="color:#7a5530">/ ${s.base}t base</span></div>
+      </div>
+      <div class="scope-track">
+        <div class="scope-bar" style="width:${valPct}%;background:${s.col};opacity:0.85"></div>
+        <div class="scope-baseline" style="left:${basePct}%"></div>
+      </div>
+      <div class="scope-note">${redPct}% reduction from baseline</div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderBars();
+renderDonut();
+renderLine();
+renderScope();
+window.addEventListener('resize',()=>{renderBars();renderLine();});
+</script>
+</body>
+</html>
