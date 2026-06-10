@@ -352,7 +352,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<div class="footer">Jira Process Engineering Dashboard &middot; Mock data for portfolio demonstration &middot; visualizepro.com.au &middot; 2026</div>
+<div class="footer">Jira Process Engineering Dashboard &middot; Mock data for portfolio demonstration &middot; 2026</div>
 
 <script>
 const RAW_DATA=REPLACE_DATA;
