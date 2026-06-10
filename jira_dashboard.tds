@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<datasource name='Jira Process Engineering Dashboard' role='txfc' version='18.1' xmlns:user='http://www.tableausoftware.com/xml/user'>
+  <connection class='text' filename='C:\Users\madel\Tableau-Reports\jira_mock_data.csv' separator=',' codepage='65001' locale='en_US' preview-rows='100' password=''>
+    <relation name='jira_mock_data.csv' table='[jira_mock_data#csv]' type='table' />
+    <metadata-records>
+      <metadata-record class='column'><remote-name>Issue Key</remote-name><remote-type>129</remote-type><local-name>[Issue Key]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Issue Key</remote-alias><ordinal>1</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Project</remote-name><remote-type>129</remote-type><local-name>[Project]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Project</remote-alias><ordinal>2</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Issue Type</remote-name><remote-type>129</remote-type><local-name>[Issue Type]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Issue Type</remote-alias><ordinal>3</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Summary</remote-name><remote-type>129</remote-type><local-name>[Summary]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Summary</remote-alias><ordinal>4</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Status</remote-name><remote-type>129</remote-type><local-name>[Status]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Status</remote-alias><ordinal>5</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Priority</remote-name><remote-type>129</remote-type><local-name>[Priority]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Priority</remote-alias><ordinal>6</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Assignee</remote-name><remote-type>129</remote-type><local-name>[Assignee]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Assignee</remote-alias><ordinal>7</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Reporter</remote-name><remote-type>129</remote-type><local-name>[Reporter]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Reporter</remote-alias><ordinal>8</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Team</remote-name><remote-type>129</remote-type><local-name>[Team]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Team</remote-alias><ordinal>9</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Sprint</remote-name><remote-type>129</remote-type><local-name>[Sprint]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Sprint</remote-alias><ordinal>10</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Epic</remote-name><remote-type>129</remote-type><local-name>[Epic]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Epic</remote-alias><ordinal>11</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Story Points</remote-name><remote-type>4</remote-type><local-name>[Story Points]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Story Points</remote-alias><ordinal>12</ordinal><local-type>integer</local-type><aggregation>Sum</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Original Estimate (hrs)</remote-name><remote-type>4</remote-type><local-name>[Original Estimate (hrs)]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Original Estimate (hrs)</remote-alias><ordinal>13</ordinal><local-type>integer</local-type><aggregation>Sum</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Time Spent (hrs)</remote-name><remote-type>4</remote-type><local-name>[Time Spent (hrs)]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Time Spent (hrs)</remote-alias><ordinal>14</ordinal><local-type>integer</local-type><aggregation>Sum</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Created Date</remote-name><remote-type>7</remote-type><local-name>[Created Date]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Created Date</remote-alias><ordinal>15</ordinal><local-type>date</local-type><aggregation>Year</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Updated Date</remote-name><remote-type>7</remote-type><local-name>[Updated Date]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Updated Date</remote-alias><ordinal>16</ordinal><local-type>date</local-type><aggregation>Year</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Resolved Date</remote-name><remote-type>7</remote-type><local-name>[Resolved Date]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Resolved Date</remote-alias><ordinal>17</ordinal><local-type>date</local-type><aggregation>Year</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Due Date</remote-name><remote-type>7</remote-type><local-name>[Due Date]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Due Date</remote-alias><ordinal>18</ordinal><local-type>date</local-type><aggregation>Year</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Resolution</remote-name><remote-type>129</remote-type><local-name>[Resolution]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Resolution</remote-alias><ordinal>19</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Component</remote-name><remote-type>129</remote-type><local-name>[Component]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Component</remote-alias><ordinal>20</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Environment</remote-name><remote-type>129</remote-type><local-name>[Environment]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Environment</remote-alias><ordinal>21</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Labels</remote-name><remote-type>129</remote-type><local-name>[Labels]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Labels</remote-alias><ordinal>22</ordinal><local-type>string</local-type><aggregation>Count</aggregation><contains-null>true</contains-null></metadata-record>
+      <metadata-record class='column'><remote-name>Cycle Time (days)</remote-name><remote-type>4</remote-type><local-name>[Cycle Time (days)]</local-name><parent-name>[jira_mock_data#csv]</parent-name><remote-alias>Cycle Time (days)</remote-alias><ordinal>23</ordinal><local-type>integer</local-type><aggregation>Avg</aggregation><contains-null>true</contains-null></metadata-record>
+    </metadata-records>
+  </connection>
+
+  <!-- ── DIMENSIONS ── -->
+  <column datatype='string'  name='[Issue Key]'   role='dimension' type='nominal' />
+  <column datatype='string'  name='[Project]'     role='dimension' type='nominal' />
+  <column datatype='string'  name='[Issue Type]'  role='dimension' type='nominal' />
+  <column datatype='string'  name='[Summary]'     role='dimension' type='nominal' />
+  <column datatype='string'  name='[Status]'      role='dimension' type='nominal' />
+  <column datatype='string'  name='[Priority]'    role='dimension' type='nominal' />
+  <column datatype='string'  name='[Assignee]'    role='dimension' type='nominal' />
+  <column datatype='string'  name='[Reporter]'    role='dimension' type='nominal' />
+  <column datatype='string'  name='[Team]'        role='dimension' type='nominal' />
+  <column datatype='string'  name='[Sprint]'      role='dimension' type='nominal' />
+  <column datatype='string'  name='[Epic]'        role='dimension' type='nominal' />
+  <column datatype='string'  name='[Resolution]'  role='dimension' type='nominal' />
+  <column datatype='string'  name='[Component]'   role='dimension' type='nominal' />
+  <column datatype='string'  name='[Environment]' role='dimension' type='nominal' />
+  <column datatype='string'  name='[Labels]'      role='dimension' type='nominal' />
+  <column datatype='date'    name='[Created Date]'  role='dimension' type='ordinal' />
+  <column datatype='date'    name='[Updated Date]'  role='dimension' type='ordinal' />
+  <column datatype='date'    name='[Resolved Date]' role='dimension' type='ordinal' />
+  <column datatype='date'    name='[Due Date]'      role='dimension' type='ordinal' />
+
+  <!-- ── MEASURES ── -->
+  <column datatype='integer' name='[Story Points]'            role='measure' type='quantitative' default-format='d' />
+  <column datatype='integer' name='[Original Estimate (hrs)]' role='measure' type='quantitative' default-format='d' />
+  <column datatype='integer' name='[Time Spent (hrs)]'        role='measure' type='quantitative' default-format='d' />
+  <column datatype='integer' name='[Cycle Time (days)]'       role='measure' type='quantitative' default-format='d' />
+
+  <!-- ── CALCULATED FIELDS ── -->
+
+  <column caption='Is Overdue' datatype='string' name='[Is Overdue]' role='dimension' type='nominal'>
+    <calculation class='tableau' formula='IF [Status] != &quot;Done&quot; AND [Due Date] &lt; TODAY() THEN &quot;Overdue&quot; ELSE &quot;On Track&quot; END' />
+  </column>
+
+  <column caption='Sprint Number' datatype='integer' name='[Sprint Number]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='INT(RIGHT([Sprint], 1))' />
+  </column>
+
+  <column caption='Priority Rank' datatype='integer' name='[Priority Rank]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='CASE [Priority] WHEN &quot;Highest&quot; THEN 1 WHEN &quot;High&quot; THEN 2 WHEN &quot;Medium&quot; THEN 3 WHEN &quot;Low&quot; THEN 4 WHEN &quot;Lowest&quot; THEN 5 END' />
+  </column>
+
+  <column caption='Remaining Hours' datatype='integer' name='[Remaining Hours]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='ZN([Original Estimate (hrs)]) - ZN([Time Spent (hrs)])' />
+  </column>
+
+  <column caption='% Time Used' datatype='real' name='[Pct Time Used]' role='measure' type='quantitative' default-format='p0%'>
+    <calculation class='tableau' formula='IF ZN([Original Estimate (hrs)]) &gt; 0 THEN ZN([Time Spent (hrs)]) / [Original Estimate (hrs)] END' />
+  </column>
+
+  <column caption='Is Blocked' datatype='integer' name='[Is Blocked]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='IF [Status] = &quot;Blocked&quot; THEN 1 ELSE 0 END' />
+  </column>
+
+  <column caption='Is Done' datatype='integer' name='[Is Done]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='IF [Status] = &quot;Done&quot; THEN 1 ELSE 0 END' />
+  </column>
+
+  <column caption='Completion Rate' datatype='real' name='[Completion Rate]' role='measure' type='quantitative' default-format='p0%'>
+    <calculation class='tableau' formula='SUM([Is Done]) / COUNT([Issue Key])' />
+  </column>
+
+  <column caption='Avg Cycle Time (days)' datatype='real' name='[Avg Cycle Time]' role='measure' type='quantitative' default-format='0.0'>
+    <calculation class='tableau' formula='AVG(IF [Cycle Time (days)] &gt; 0 THEN [Cycle Time (days)] END)' />
+  </column>
+
+  <column caption='Workload Score' datatype='integer' name='[Workload Score]' role='measure' type='quantitative'>
+    <calculation class='tableau' formula='ZN([Story Points]) + ZN([Original Estimate (hrs)])' />
+  </column>
+
+</datasource>
