@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LMI Arrears &amp; Default Monitoring</title>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#ffffff;color:#333333;font-size:13px;
+  font-family:'Open Sans','Benton Sans','Segoe UI',Arial,Helvetica,sans-serif;}
+
+/* Worksheet tab strip (Tableau) */
+.tabstrip{display:flex;align-items:flex-end;gap:2px;background:#e9e9e9;
+  border-bottom:1px solid #c4c4c4;padding:0 10px;height:33px;}
+.tab{font-size:12px;color:#5a5a5a;padding:6px 18px;border:1px solid transparent;
+  border-bottom:none;background:#dcdcdc;border-radius:2px 2px 0 0;margin-bottom:-1px;
+  text-decoration:none;cursor:pointer;}
+a.tab:hover{background:#eaeaea;color:#1f1f1f;}
+.tab.active{background:#ffffff;color:#1f1f1f;font-weight:700;
+  border:1px solid #c4c4c4;border-bottom:1px solid #ffffff;}
+.tab.plus{background:transparent;color:#9a9a9a;padding:6px 10px;}
+
+/* Title band */
+.titlebar{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;
+  padding:14px 22px 13px;border-bottom:1px solid #d6d6d6;background:#ffffff;}
+.titlebar h1{font-size:20px;font-weight:700;color:#1f1f1f;letter-spacing:-0.01em;}
+.titlebar .sub{font-size:11.5px;color:#888;margin-top:3px;}
+.asof{text-align:right;font-size:10px;color:#8a8a8a;letter-spacing:0.04em;
+  text-transform:uppercase;white-space:nowrap;}
+.asof .v{font-size:17px;font-weight:700;color:#333;text-transform:none;letter-spacing:0;margin:2px 0;}
+
+/* KPI band (Tableau BANs) */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;
+  padding:13px 22px;background:#f4f4f4;border-bottom:1px solid #d6d6d6;}
+.kpi{background:#ffffff;border:1px solid #d6d6d6;padding:11px 14px;border-top:3px solid #bcbcbc;}
+.kpi-val{font-size:25px;font-weight:700;line-height:1.05;color:#2b2b2b;}
+.kpi-lbl{font-size:11px;color:#5a5a5a;margin-top:4px;font-weight:600;}
+.kpi-note{font-size:10px;color:#9a9a9a;margin-top:2px;}
+.kpi.c1{border-top-color:#F28E2B;} .kpi.c1 .kpi-val{color:#C56A12;}
+.kpi.c2{border-top-color:#E15759;} .kpi.c2 .kpi-val{color:#C0413F;}
+.kpi.c3{border-top-color:#B0413E;} .kpi.c3 .kpi-val{color:#9A2F2C;}
+.kpi.c4{border-top-color:#EDC948;} .kpi.c4 .kpi-val{color:#B7942B;}
+.kpi.c5{border-top-color:#59A14F;} .kpi.c5 .kpi-val{color:#3F7A37;}
+
+/* Layout: left quick-filter rail + worksheet area */
+.layout{display:flex;align-items:stretch;min-height:62vh;}
+.filters{width:216px;flex-shrink:0;background:#f4f4f4;border-right:1px solid #d6d6d6;padding:14px 12px;}
+.filters-h{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;
+  color:#7a7a7a;margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid #dadada;}
+.fcard{background:#ffffff;border:1px solid #d6d6d6;margin-bottom:11px;}
+.fcard-h{font-size:11px;font-weight:700;color:#4e4e4e;padding:6px 9px;
+  border-bottom:1px solid #e6e6e6;background:#fafafa;display:flex;
+  align-items:center;justify-content:space-between;}
+.fcard-h .x{color:#a6a6a6;font-size:10px;}
+.fopts{padding:7px 8px;display:flex;flex-wrap:wrap;gap:5px;}
+.fopt{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#555;
+  cursor:pointer;padding:3px 8px;border:1px solid #d3d3d3;border-radius:2px;
+  background:#ffffff;user-select:none;transition:all .12s;}
+.fopt:hover{border-color:#9bb9d9;}
+.fopt i.bx{width:11px;height:11px;border:1px solid #9a9a9a;border-radius:2px;display:inline-block;flex-shrink:0;}
+.fopt.active{background:#4576b5;border-color:#4576b5;color:#ffffff;}
+.fopt.active i.bx{background:#ffffff;border-color:#ffffff;}
+
+.main{flex:1;min-width:0;padding:16px 18px 46px;background:#ffffff;}
+
+/* Text / annotation tiles (Tableau text objects) */
+.annot{display:flex;gap:10px;align-items:flex-start;background:#ffffff;
+  border:1px solid #d6d6d6;border-left:4px solid #9aa0a6;padding:11px 14px;
+  margin-bottom:14px;font-size:12px;color:#555;line-height:1.6;}
+.annot strong{color:#2b2b2b;}
+.annot-i{color:#9aa0a6;font-size:13px;line-height:1.3;flex-shrink:0;}
+.annot.warn{border-left-color:#E15759;background:#fdf3f3;}
+.annot.warn .annot-i{color:#E15759;}
+.annot.info{border-left-color:#4E79A7;background:#f5f8fb;}
+.annot.info .annot-i{color:#4E79A7;}
+
+/* Section labels */
+.sec{font-size:10px;font-weight:700;letter-spacing:0.08em;color:#8a8a8a;
+  text-transform:uppercase;margin:16px 0 9px;padding-bottom:5px;border-bottom:1px solid #e4e4e4;}
+.sec:first-child{margin-top:2px;}
+
+/* Worksheet tiles */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.mb{margin-bottom:12px;}
+.card{background:#ffffff;border:1px solid #d6d6d6;}
+.card.alert-card{border-color:#e9b3b3;}
+.card-cap{padding:8px 12px 7px;border-bottom:1px solid #ececec;background:#ffffff;}
+.card-title{font-size:13px;font-weight:700;color:#2b2b2b;}
+.card-sub{font-size:10.5px;color:#8f8f8f;margin-top:3px;line-height:1.5;}
+.card-body{padding:12px 12px 10px;}
+.ch200{position:relative;height:200px;} .ch240{position:relative;height:240px;}
+.ch280{position:relative;height:280px;} .ch320{position:relative;height:320px;}
+
+/* Crosstab summary */
+.stat-blocks{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.stat-block{background:#ffffff;border:1px solid #d6d6d6;padding:14px 16px;}
+.sb-val{font-size:23px;font-weight:700;color:#2b2b2b;}
+.sb-lbl{font-size:11px;color:#5a5a5a;margin-top:4px;font-weight:600;}
+.sb-sub{font-size:10px;color:#9a9a9a;margin-top:2px;}
+
+/* Status / data-source bar */
+.footer{display:flex;align-items:center;justify-content:space-between;
+  padding:8px 22px;font-size:10.5px;color:#8a8a8a;background:#f4f4f4;border-top:1px solid #d6d6d6;}
+.footer .ds::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:#59A14F;margin-right:6px;vertical-align:middle;}
+</style>
+</head>
+<body>
+
+<div class="tabstrip">
+  <div class="tab active">Arrears &amp; Default</div>
+  <a class="tab" href="portfolio_risk_dashboard.html">Portfolio Risk</a>
+  <div class="tab plus">+</div>
+</div>
+
+<div class="titlebar">
+  <div>
+    <h1>LMI Arrears &amp; Default Monitoring</h1>
+    <div class="sub">Lenders Mortgage Insurance &middot; 30 / 60 / 90 day arrears &middot; default analysis &middot; early-warning indicators &middot; Jan 2022 &ndash; Dec 2024</div>
+  </div>
+  <div class="asof">
+    <div>Reporting period</div>
+    <div class="v">Dec 2024</div>
+    <div>36 monthly snapshots</div>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi c1"><div class="kpi-val">68</div><div class="kpi-lbl">In Arrears (Latest Month)</div><div class="kpi-note">3.4% of portfolio</div></div>
+  <div class="kpi c2"><div class="kpi-val">2.25%</div><div class="kpi-lbl">30-Day Arrears Rate</div><div class="kpi-note">Latest month</div></div>
+  <div class="kpi c3"><div class="kpi-val">0.10%</div><div class="kpi-lbl">90+ Day Arrears Rate</div><div class="kpi-note">Serious arrears &mdash; default risk</div></div>
+  <div class="kpi c4"><div class="kpi-val">62</div><div class="kpi-lbl">Claims Lodged</div><div class="kpi-note">3.1% default rate</div></div>
+  <div class="kpi c5"><div class="kpi-val">$2.60M</div><div class="kpi-lbl">Net Loss After Recovery</div><div class="kpi-note">Claims paid less recoveries</div></div>
+</div>
+
+<div class="layout">
+  <aside class="filters">
+    <div class="filters-h">Filters</div>
+    <div class="fcard"><div class="fcard-h">State<span class="x">&#9662;</span></div><div class="fopts"><span class="fopt active" data-group="state" data-val=""><i class="bx"></i>(All)</span><span class="fopt" data-group="state" data-val="NSW"><i class="bx"></i>NSW</span><span class="fopt" data-group="state" data-val="VIC"><i class="bx"></i>VIC</span><span class="fopt" data-group="state" data-val="QLD"><i class="bx"></i>QLD</span><span class="fopt" data-group="state" data-val="WA"><i class="bx"></i>WA</span><span class="fopt" data-group="state" data-val="SA"><i class="bx"></i>SA</span><span class="fopt" data-group="state" data-val="TAS"><i class="bx"></i>TAS</span><span class="fopt" data-group="state" data-val="ACT"><i class="bx"></i>ACT</span><span class="fopt" data-group="state" data-val="NT"><i class="bx"></i>NT</span></div></div><div class="fcard"><div class="fcard-h">LVR Band<span class="x">&#9662;</span></div><div class="fopts"><span class="fopt active" data-group="lvr_band" data-val=""><i class="bx"></i>(All)</span><span class="fopt" data-group="lvr_band" data-val="≤80%"><i class="bx"></i>≤80%</span><span class="fopt" data-group="lvr_band" data-val="80-85%"><i class="bx"></i>80-85%</span><span class="fopt" data-group="lvr_band" data-val="85-90%"><i class="bx"></i>85-90%</span><span class="fopt" data-group="lvr_band" data-val="90-95%"><i class="bx"></i>90-95%</span><span class="fopt" data-group="lvr_band" data-val="95%+"><i class="bx"></i>95%+</span></div></div><div class="fcard"><div class="fcard-h">Borrower Type<span class="x">&#9662;</span></div><div class="fopts"><span class="fopt active" data-group="borrower_type" data-val=""><i class="bx"></i>(All)</span><span class="fopt" data-group="borrower_type" data-val="First Home Buyer"><i class="bx"></i>First Home Buyer</span><span class="fopt" data-group="borrower_type" data-val="Owner Occupier"><i class="bx"></i>Owner Occupier</span><span class="fopt" data-group="borrower_type" data-val="Investor"><i class="bx"></i>Investor</span><span class="fopt" data-group="borrower_type" data-val="Refinancer"><i class="bx"></i>Refinancer</span></div></div>
+  </aside>
+
+  <main class="main">
+
+    
+
+    <div class="annot info">
+      <span class="annot-i">&#9632;</span>
+      <div>
+        <strong>Arrears trend &mdash; rate-hike stress cycle visible in 2022&ndash;2023.</strong>
+        Peak arrears stress occurred in <strong>mid-2023</strong> as the RBA rate-hike cycle (May 2022 &ndash; Nov 2023) compressed borrower serviceability.
+        The <strong>90+ day rate peaked at 0.25%</strong> before moderating into 2024.
+        High-LVR borrowers (90&ndash;95% and 95%+) show roughly <strong>3&times; the default rate</strong> of lower-LVR cohorts,
+        and self-employed borrowers carry elevated default risk versus PAYG.
+      </div>
+    </div>
+
+    <div class="sec">Monthly Arrears Trend &middot; Jan 2022 &ndash; Dec 2024</div>
+    <div class="card mb">
+      <div class="card-cap">
+        <div class="card-title">Arrears Rate Over Time &mdash; 30 / 60 / 90 / 90+ Day</div>
+        <div class="card-sub">Monthly percentage of the portfolio in each arrears bucket. The 2022&ndash;2023 rate-hike cycle is clearly visible as a rising arrears tide. The 90+ day band is the primary leading indicator of incoming claims.</div>
+      </div>
+      <div class="card-body"><div class="ch280"><canvas id="trendChart"></canvas></div></div>
+    </div>
+
+    <div class="sec">Arrears Volume by Bucket &middot; Stacked</div>
+    <div class="card mb">
+      <div class="card-cap">
+        <div class="card-title">Monthly Arrears Count by Severity Bucket (Stacked)</div>
+        <div class="card-sub">A growing 90+ band (purple) without a proportional increase in the 30-day band signals loans skipping intermediate stages &mdash; a sign of acute financial distress rather than short-term cash-flow issues.</div>
+      </div>
+      <div class="card-body"><div class="ch280"><canvas id="stackedChart"></canvas></div></div>
+    </div>
+
+    <div class="sec">Default Rate Analysis &middot; By Risk Segment</div>
+    <div class="grid3 mb">
+      <div class="card">
+        <div class="card-cap"><div class="card-title">Default Rate by LVR Band</div>
+          <div class="card-sub">The sharpest risk gradient in LMI portfolios. Each 5-point LVR step materially increases default probability.</div></div>
+        <div class="card-body"><div class="ch240"><canvas id="drLvrChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-cap"><div class="card-title">Default Rate by Borrower Type</div>
+          <div class="card-sub">Investors show higher default rates than owner-occupiers &mdash; investment properties are more likely to be sold or defaulted on when cash flow deteriorates.</div></div>
+        <div class="card-body"><div class="ch240"><canvas id="drBorrChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-cap"><div class="card-title">Default Rate by Property Type</div>
+          <div class="card-sub">Apartments and land carry higher default rates. Land loans lack income-generating capacity; apartments face oversupply risk that depresses recoveries.</div></div>
+        <div class="card-body"><div class="ch240"><canvas id="drPropChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="sec">Employment Risk &middot; State vs National Benchmark</div>
+    <div class="grid2 mb">
+      <div class="card">
+        <div class="card-cap"><div class="card-title">Default Rate by Employment Type</div>
+          <div class="card-sub">Self-employed borrowers carry the highest default risk &mdash; income volatility, irregular cash flows, and greater economic-cycle exposure. Contract workers sit between PAYG and self-employed.</div></div>
+        <div class="card-body"><div class="ch240"><canvas id="drEmpChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-cap"><div class="card-title">State Arrears Rate vs National Average (Latest Month)</div>
+          <div class="card-sub">States above the national-average reference line are experiencing above-average arrears stress. NT consistently shows elevated arrears due to the smaller, more volatile local economy.</div></div>
+        <div class="card-body"><div class="ch240"><canvas id="stateArrChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="sec">Early-Warning Indicator &middot; 90+ Day Arrears Rate &mdash; Last 12 Months</div>
+    <div class="card alert-card mb">
+      <div class="card-cap"><div class="card-title">90+ Day Arrears Rate &mdash; Trend vs Threshold (1.5%)</div>
+        <div class="card-sub">The 90+ day rate is the leading indicator for incoming claims. When it breaches the 1.5% threshold (reference line), claims typically follow within 3&ndash;6 months. Monitor monthly for threshold crossings.</div></div>
+      <div class="card-body"><div class="ch240"><canvas id="ewChart"></canvas></div></div>
+    </div>
+
+    <div class="sec">Claims Summary</div>
+    <div class="stat-blocks">
+      <div class="stat-block"><div class="sb-val" style="color:#C0413F;">62</div><div class="sb-lbl">Total Claims Lodged</div><div class="sb-sub">3.10% of portfolio</div></div>
+      <div class="stat-block"><div class="sb-val" style="color:#C56A12;">$6.53M</div><div class="sb-lbl">Gross Claims Amount</div><div class="sb-sub">Before recoveries</div></div>
+      <div class="stat-block"><div class="sb-val" style="color:#3F7A37;">$3.93M</div><div class="sb-lbl">Total Recoveries</div><div class="sb-sub">From property sales</div></div>
+      <div class="stat-block"><div class="sb-val" style="color:#9A2F2C;">$2.60M</div><div class="sb-lbl">Net Loss After Recovery</div><div class="sb-sub">Actual cost to insurer</div></div>
+    </div>
+
+  </main>
+</div>
+
+<div class="footer">
+  <div class="ds">Data source: LMI loan, arrears &amp; claims extract (synthetic demonstration data)</div>
+  <div>2,000 policies &middot; 1,701 arrears snapshots &middot; Tableau Public style</div>
+</div>
+
+<script>
+const T_BLUE='#4E79A7',T_ORANGE='#F28E2B',T_RED='#E15759',T_TEAL='#76B7B2',
+      T_GREEN='#59A14F',T_YELLOW='#EDC948',T_PURPLE='#B07AA1',T_BROWN='#9C755F',T_GRAY='#9aa0a6';
+const GRID='#e8e8e8', AXIS='#cccccc', TICK='#707070';
+Chart.defaults.color=TICK;
+Chart.defaults.font.family="'Open Sans','Benton Sans',Arial,sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.padding=10;
+Chart.defaults.plugins.legend.labels.color='#4e4e4e';
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+function risk(v,hi,mid){return v>hi?T_RED:v>mid?T_ORANGE:T_GREEN;}
+const xAxis=(extra={})=>Object.assign({grid:{display:false},border:{color:AXIS},ticks:{color:TICK}},extra);
+const yAxis=(extra={})=>Object.assign({grid:{color:GRID},border:{display:false},ticks:{color:TICK}},extra);
+
+const MONTHS = ["Jan 2022", "Feb 2022", "Mar 2022", "Apr 2022", "May 2022", "Jun 2022", "Jul 2022", "Aug 2022", "Sep 2022", "Oct 2022", "Nov 2022", "Dec 2022", "Jan 2023", "Feb 2023", "Mar 2023", "Apr 2023", "May 2023", "Jun 2023", "Jul 2023", "Aug 2023", "Sep 2023", "Oct 2023", "Nov 2023", "Dec 2023", "Jan 2024", "Feb 2024", "Mar 2024", "Apr 2024", "May 2024", "Jun 2024", "Jul 2024", "Aug 2024", "Sep 2024", "Oct 2024", "Nov 2024", "Dec 2024"];
+const M30    = [9, 12, 8, 16, 23, 22, 20, 29, 25, 19, 23, 26, 38, 41, 42, 34, 36, 57, 50, 30, 37, 25, 43, 46, 34, 36, 37, 48, 40, 44, 43, 33, 43, 44, 37, 45];
+const M60    = [3, 3, 2, 2, 9, 7, 5, 2, 9, 9, 10, 7, 17, 8, 13, 15, 16, 11, 12, 4, 8, 12, 9, 11, 8, 12, 6, 6, 9, 8, 9, 6, 15, 11, 9, 16];
+const M90    = [1, 2, 3, 1, 2, 2, 5, 0, 4, 0, 4, 2, 6, 4, 8, 2, 6, 2, 2, 4, 3, 5, 4, 4, 4, 3, 4, 5, 1, 1, 5, 4, 7, 3, 5, 5];
+const M90P   = [1, 0, 0, 0, 2, 0, 1, 1, 1, 0, 1, 4, 2, 0, 3, 4, 5, 3, 4, 5, 2, 1, 1, 1, 0, 1, 1, 2, 3, 3, 2, 3, 1, 1, 3, 2];
+const MRATE  = [0.7, 0.85, 0.65, 0.95, 1.8, 1.55, 1.55, 1.6, 1.95, 1.4, 1.9, 1.95, 3.15, 2.65, 3.3, 2.75, 3.15, 3.65, 3.4, 2.15, 2.5, 2.15, 2.85, 3.1, 2.3, 2.6, 2.4, 3.05, 2.65, 2.8, 2.95, 2.3, 3.3, 2.95, 2.7, 3.4];
+const M90PRATE = [0.05, 0.0, 0.0, 0.0, 0.1, 0.0, 0.05, 0.05, 0.05, 0.0, 0.05, 0.2, 0.1, 0.0, 0.15, 0.2, 0.25, 0.15, 0.2, 0.25, 0.1, 0.05, 0.05, 0.05, 0.0, 0.05, 0.05, 0.1, 0.15, 0.15, 0.1, 0.15, 0.05, 0.05, 0.15, 0.1];
+const POOL = 2000;
+
+// Trend chart
+new Chart(document.getElementById('trendChart'),{type:'line',
+  data:{labels:MONTHS,datasets:[
+    {label:'30-Day %',data:MRATE.map((_,i)=>M30[i]/POOL*100),borderColor:T_BLUE,backgroundColor:hexA(T_BLUE,0.07),tension:0,borderWidth:1.5,pointRadius:0,fill:true},
+    {label:'60-Day %',data:MRATE.map((_,i)=>M60[i]/POOL*100),borderColor:T_ORANGE,backgroundColor:hexA(T_ORANGE,0.06),tension:0,borderWidth:1.5,pointRadius:0,fill:true},
+    {label:'90-Day %',data:MRATE.map((_,i)=>M90[i]/POOL*100),borderColor:T_RED,backgroundColor:hexA(T_RED,0.05),tension:0,borderWidth:1.5,pointRadius:0,fill:true},
+    {label:'90+ Day %',data:M90PRATE,borderColor:T_PURPLE,backgroundColor:hexA(T_PURPLE,0.10),tension:0,borderWidth:2.5,pointRadius:0,fill:true},
+  ]},
+  options:{plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},
+    scales:{y:yAxis({beginAtZero:true,ticks:{color:TICK,callback:v=>v.toFixed(1)+'%'}}),x:xAxis({ticks:{color:TICK,maxTicksLimit:12}})}
+  }});
+
+new Chart(document.getElementById('stackedChart'),{type:'bar',
+  data:{labels:MONTHS,datasets:[
+    {label:'30 Day',data:M30,backgroundColor:T_BLUE,borderWidth:0},
+    {label:'60 Day',data:M60,backgroundColor:T_ORANGE,borderWidth:0},
+    {label:'90 Day',data:M90,backgroundColor:T_RED,borderWidth:0},
+    {label:'90+ Day',data:M90P,backgroundColor:T_PURPLE,borderWidth:0},
+  ]},
+  options:{plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},
+    scales:{x:Object.assign(xAxis({ticks:{color:TICK,maxTicksLimit:12}}),{stacked:true}),
+      y:Object.assign(yAxis({beginAtZero:true}),{stacked:true})}
+  }});
+
+new Chart(document.getElementById('drLvrChart'),{type:'bar',
+  data:{labels:["\u226480%", "80-85%", "85-90%", "90-95%", "95%+"],datasets:[{label:'Default Rate %',
+    data:[0.93, 0.25, 2.95, 5.19, 3.9],
+    backgroundColor:[0.93, 0.25, 2.95, 5.19, 3.9].map(v=>risk(v,4,2)),borderWidth:0}]},
+  options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'% default rate'}}},
+    scales:{y:yAxis({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),x:xAxis()}
+  }});
+
+new Chart(document.getElementById('drBorrChart'),{type:'bar',
+  data:{labels:["First Home Buyer", "Owner Occupier", "Investor", "Refinancer"],datasets:[{label:'Default Rate %',
+    data:[2.59, 3.34, 3.06, 5.62],
+    backgroundColor:[2.59, 3.34, 3.06, 5.62].map(v=>risk(v,4,2)),borderWidth:0}]},
+  options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'% default rate'}}},
+    scales:{y:yAxis({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),x:xAxis({ticks:{color:TICK,font:{size:10}}})}
+  }});
+
+new Chart(document.getElementById('drPropChart'),{type:'bar',
+  data:{labels:["House", "Apartment", "Townhouse", "Land"],datasets:[{label:'Default Rate %',
+    data:[3.21, 2.29, 3.7, 8.82],
+    backgroundColor:[3.21, 2.29, 3.7, 8.82].map(v=>risk(v,4,2)),borderWidth:0}]},
+  options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'% default rate'}}},
+    scales:{y:yAxis({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),x:xAxis()}
+  }});
+
+new Chart(document.getElementById('drEmpChart'),{type:'bar',
+  data:{labels:["PAYG", "Self-Employed", "Contract"],datasets:[{label:'Default Rate %',
+    data:[2.98, 3.26, 3.59],
+    backgroundColor:[T_GREEN,T_RED,T_ORANGE],borderWidth:0}]},
+  options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'% default rate'}}},
+    scales:{y:yAxis({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),x:xAxis()}
+  }});
+
+const natAvg = 3.4;
+new Chart(document.getElementById('stateArrChart'),{type:'bar',
+  data:{labels:["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"],datasets:[
+    {label:'State Rate %',data:[3.36, 3.91, 4.24, 2.01, 1.83, 3.23, 2.27, 0.0],
+      backgroundColor:[3.36, 3.91, 4.24, 2.01, 1.83, 3.23, 2.27, 0.0].map(v=>v>natAvg?T_RED:T_BLUE),borderWidth:0},
+    {label:'National Avg',data:Array(8).fill(natAvg),type:'line',
+      borderColor:T_GRAY,borderDash:[5,4],borderWidth:2,pointRadius:0,fill:false}
+  ]},
+  options:{indexAxis:'y',plugins:{legend:{position:'top'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.x.toFixed(2)+'%'}}},
+    scales:{x:Object.assign(yAxis({ticks:{color:TICK,callback:v=>v+'%'}}),{grid:{color:GRID}}),y:xAxis()}
+  }});
+
+const EW_LABELS = ["Jan 2024", "Feb 2024", "Mar 2024", "Apr 2024", "May 2024", "Jun 2024", "Jul 2024", "Aug 2024", "Sep 2024", "Oct 2024", "Nov 2024", "Dec 2024"];
+const EW_DATA   = [0.0, 0.05, 0.05, 0.1, 0.15, 0.15, 0.1, 0.15, 0.05, 0.05, 0.15, 0.1];
+const THRESH    = 1.5;
+new Chart(document.getElementById('ewChart'),{type:'line',
+  data:{labels:EW_LABELS,datasets:[
+    {label:'90+ Day Rate %',data:EW_DATA,
+      borderColor:T_RED,backgroundColor:hexA(T_RED,0.08),
+      tension:0,borderWidth:2.5,pointRadius:4,pointBackgroundColor:EW_DATA.map(v=>v>THRESH?T_RED:T_GREEN),fill:true},
+    {label:'Threshold (1.5%)',data:Array(EW_LABELS.length).fill(THRESH),type:'line',
+      borderColor:T_GRAY,borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false}
+  ]},
+  options:{plugins:{legend:{position:'top'},
+    tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},
+    scales:{y:yAxis({ticks:{color:TICK,callback:v=>v.toFixed(1)+'%'}}),x:xAxis()}
+  }});
+
+// Quick-filter cards (visual selection, Tableau-style)
+document.querySelectorAll('.fopt').forEach(p=>{
+  p.addEventListener('click',()=>{
+    const g=p.dataset.group;
+    document.querySelectorAll(`.fopt[data-group="${g}"]`).forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
