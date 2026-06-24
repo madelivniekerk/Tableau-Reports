@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>StreamCo · Streaming Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Sora:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -24,35 +24,38 @@ body{min-height:100vh;color:var(--text);font-family:'DM Sans',system-ui,sans-ser
     linear-gradient(180deg,#070806 0%,#0c0f07 50%,#070806 100%);
   overflow-x:hidden;}
 
-/* Header */
-.header{background:rgba(6,8,4,0.94);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(194,249,74,0.18);padding:20px 44px 0;position:relative;z-index:2;}
-.header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:18px;}
-.logo-group{display:flex;align-items:center;gap:14px;}
-.logo-icon{width:48px;height:48px;border-radius:14px;
-  background:linear-gradient(135deg,#7BC22B,#C2F94A 55%,#FFE000);
-  display:flex;align-items:center;justify-content:center;font-size:22px;color:#0a0d04;
-  box-shadow:0 0 26px rgba(194,249,74,0.45);}
-.logo-title{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:#eaffc0;letter-spacing:-0.01em;}
-.logo-sub{font-size:10px;color:var(--green);margin-top:3px;letter-spacing:0.09em;font-weight:500;text-transform:uppercase;}
-.as-at{text-align:right;background:rgba(194,249,74,0.07);
-  border:1px solid rgba(194,249,74,0.22);border-radius:10px;padding:9px 16px;}
-.as-at-label{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:0.10em;margin-bottom:3px;}
-.as-at-val{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--yellow);}
-.as-at-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+/* Broadcast masthead */
+.masthead{position:relative;z-index:2;padding:26px 44px 0 42px;
+  background:linear-gradient(102deg,#090b05 0%,#0e1308 58%,#0a0c06 100%);
+  border-bottom:1px solid rgba(194,249,74,0.16);}
+.masthead::before{content:'';position:absolute;left:0;top:0;bottom:0;width:7px;
+  background:linear-gradient(180deg,var(--green),var(--green3));box-shadow:0 0 20px rgba(194,249,74,0.55);}
+.mast-top{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;}
+.eyebrow{font-family:'Sora',sans-serif;font-size:11px;font-weight:600;letter-spacing:0.34em;
+  text-transform:uppercase;color:var(--green);margin-bottom:6px;}
+.wordmark{font-family:'Anton',sans-serif;font-size:56px;line-height:0.9;letter-spacing:0.015em;
+  text-transform:uppercase;color:#f4f9e8;}
+.wordmark em{font-style:normal;color:var(--green);}
+.mast-sub{font-size:11px;color:var(--muted);margin-top:11px;letter-spacing:0.03em;}
+.mast-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;padding-bottom:3px;}
+.period{font-family:'Anton',sans-serif;font-size:34px;line-height:0.85;color:var(--yellow);letter-spacing:0.02em;}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:600;
+  letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);}
+.live .dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(194,249,74,0.6);animation:pulse 2.2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(194,249,74,0.5);}70%{box-shadow:0 0 0 8px rgba(194,249,74,0);}100%{box-shadow:0 0 0 0 rgba(194,249,74,0);}}
 
-/* Tab nav */
-.tabnav{display:flex;gap:6px;align-items:flex-end;}
-.tabbtn{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--muted);
-  padding:11px 22px;cursor:pointer;border:1px solid transparent;border-bottom:none;
-  border-radius:9px 9px 0 0;background:rgba(194,249,74,0.04);transition:all .15s;display:flex;align-items:center;gap:8px;}
-.tabbtn .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.6;}
-.tabbtn:hover{color:var(--text);background:rgba(194,249,74,0.09);}
-.tabbtn.active{color:#0a0d04;background:linear-gradient(135deg,var(--green),var(--green2));
-  border-color:var(--green);box-shadow:0 -2px 16px rgba(194,249,74,0.30);}
-.tabbtn.active .dot{background:#0a0d04;opacity:1;}
-.tabbtn.t2.active{background:linear-gradient(135deg,var(--yellow),var(--yellow2));border-color:var(--yellow);
-  box-shadow:0 -2px 16px rgba(255,224,0,0.28);}
+/* Segmented-control tabs */
+.tabnav{display:inline-flex;margin:22px 0 -1px;border:1px solid rgba(194,249,74,0.30);
+  border-radius:10px 10px 0 0;overflow:hidden;background:rgba(194,249,74,0.04);}
+.tabbtn{font-family:'Sora',sans-serif;font-size:12.5px;font-weight:600;color:var(--muted);
+  padding:12px 26px;cursor:pointer;border-right:1px solid rgba(194,249,74,0.16);
+  transition:all .15s;display:flex;align-items:center;gap:9px;letter-spacing:0.015em;}
+.tabbtn:last-child{border-right:none;}
+.tabbtn .seg-n{font-family:'Anton',sans-serif;font-size:12px;opacity:0.55;letter-spacing:0.04em;}
+.tabbtn:hover{color:var(--text);background:rgba(194,249,74,0.10);}
+.tabbtn.active{color:#0a0d04;background:linear-gradient(135deg,var(--green),var(--green2));}
+.tabbtn.active .seg-n{opacity:0.85;}
 
 /* KPI row */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;
@@ -107,6 +110,28 @@ body{min-height:100vh;color:var(--text);font-family:'DM Sans',system-ui,sans-ser
 .bar-cell .b{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--green3),var(--green));}
 .num{font-family:'Sora',sans-serif;font-weight:600;}
 
+/* Generated content "poster" art */
+.poster{position:relative;border-radius:7px;overflow:hidden;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.08);}
+.poster::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 30% 20%,rgba(255,255,255,0.18),transparent 60%);}
+.poster .glyph{position:relative;z-index:1;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45));opacity:0.95;}
+.poster .pttl{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:14px 8px 7px;
+  font-family:'Sora',sans-serif;font-size:10px;font-weight:700;color:#fff;line-height:1.18;
+  background:linear-gradient(to top,rgba(0,0,0,0.78),transparent);text-shadow:0 1px 3px rgba(0,0,0,0.7);}
+.poster .badge{position:absolute;top:6px;left:6px;z-index:2;font-size:8px;font-weight:700;
+  letter-spacing:0.04em;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,0.42);color:#fff;}
+.poster.thumb{width:42px;height:58px;}
+.poster.hero{width:128px;height:182px;}
+
+/* Trending strip */
+.trending{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 12px;}
+.trending::-webkit-scrollbar{height:7px;}
+.trending::-webkit-scrollbar-thumb{background:rgba(194,249,74,0.25);border-radius:4px;}
+.trend-item{display:flex;flex-direction:column;gap:7px;width:128px;flex-shrink:0;}
+.trend-meta{font-size:10px;color:var(--muted);line-height:1.3;}
+
 /* Cohort heatmap */
 .heat{width:100%;border-collapse:separate;border-spacing:4px;font-size:11px;}
 .heat th{font-size:10px;color:var(--muted);font-weight:600;padding:4px;text-align:center;}
@@ -124,27 +149,25 @@ body{min-height:100vh;color:var(--text);font-family:'DM Sans',system-ui,sans-ser
 </head>
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <div class="logo-group">
-      <div class="logo-icon">&#9654;</div>
-      <div>
-        <div class="logo-title">StreamCo &middot; Streaming Intelligence</div>
-        <div class="logo-sub">Sport Live &middot; On Demand &middot; Premium TV &middot; All-Access &nbsp;|&nbsp; Subscription &middot; Retention &middot; Segmentation &middot; Content</div>
-      </div>
+<header class="masthead">
+  <div class="mast-top">
+    <div class="mast-brand">
+      <div class="eyebrow">Streaming Intelligence</div>
+      <div class="wordmark">Stream<em>Co</em></div>
+      <div class="mast-sub">Subscription &middot; Retention &middot; Segmentation &middot; Content &nbsp;&nbsp;|&nbsp;&nbsp; Sport Live &middot; On Demand &middot; Premium TV &middot; All-Access</div>
     </div>
-    <div class="as-at">
-      <div class="as-at-label">&#11044; REPORTING PERIOD</div>
-      <div class="as-at-val">FY25</div>
-      <div class="as-at-sub">Rolling 12 months &middot; mock data</div>
+    <div class="mast-right">
+      <div class="period">FY25</div>
+      <div class="live"><span class="dot"></span>Live &middot; rolling 12 months</div>
+      <div class="live" style="opacity:.6;">Mock data &middot; v1.0</div>
     </div>
   </div>
-  <div class="tabnav">
-    <div class="tabbtn active" data-tab="subs"><span class="dot"></span>Subscriptions &amp; Revenue</div>
-    <div class="tabbtn t2" data-tab="churn"><span class="dot"></span>Retention &amp; Churn</div>
-    <div class="tabbtn" data-tab="seg"><span class="dot"></span>Segmentation &amp; Content</div>
-  </div>
-</div>
+  <nav class="tabnav">
+    <div class="tabbtn active" data-tab="subs"><span class="seg-n">01</span>Subscriptions &amp; Revenue</div>
+    <div class="tabbtn" data-tab="churn"><span class="seg-n">02</span>Retention &amp; Churn</div>
+    <div class="tabbtn" data-tab="seg"><span class="seg-n">03</span>Segmentation &amp; Content</div>
+  </nav>
+</header>
 
 <div class="page">
 
@@ -280,9 +303,16 @@ body{min-height:100vh;color:var(--text);font-family:'DM Sans',system-ui,sans-ser
       <div class="story-text">
         <strong>Sports Diehards (24%)</strong> and <strong>Family Streamers (21%)</strong> are the two largest segments, but
         <strong>Premium Loyalists</strong> deliver the highest ARPU ($138) and tenure. <strong>Sport leads weekly viewing hours</strong>,
-        while <strong>drama titles</strong> (The Penguin, House of the Dragon) post the highest completion rates &mdash; the stickiest content for retention.
+        while <strong>drama titles</strong> (The Outsider, Dynasty of Dragons) post the highest completion rates &mdash; the stickiest content for retention.
       </div>
     </div>
+  </div>
+
+  <div class="sec">Trending Now</div>
+  <div class="card mb">
+    <div class="card-title">Most-Watched Titles This Week</div>
+    <div class="card-sub">Generated cover art &middot; ranked by total account-hours streamed in the last 7 days.</div>
+    <div class="trending" id="trendingStrip"></div>
   </div>
 
   <div class="sec">Customer Segments</div>
@@ -468,6 +498,24 @@ function initSeg(){
     options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:LBL,font:{size:10}}},
       tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'% of viewing'}}}}});
 
+  // Genre-keyed generated cover art — no external assets, no copyright risk
+  const GENRE={
+    Sport:{a:'#16380c',b:'#7BC22B',ic:'\u{1F3C9}'},
+    Drama:{a:'#3a1130',b:'#FF7AC8',ic:'\u{1F3AD}'},
+    Movie:{a:'#3a2c07',b:'#FFC800',ic:'\u{1F3AC}'},
+    Reality:{a:'#0b3330',b:'#6BE3D2',ic:'\u{1F3A4}'},
+    Lifestyle:{a:'#27310f',b:'#C9D6A0',ic:'\u{1F3E1}'},
+    Documentary:{a:'#241d36',b:'#B98AE0',ic:'\u{1F30D}'},
+    News:{a:'#222018',b:'#cfcfcf',ic:'\u{1F4F0}'},
+    Kids:{a:'#3a2406',b:'#FFB300',ic:'\u{1F9F8}'}};
+  const ghash=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;};
+  function poster(title,genre,kind){
+    const g=GENRE[genre]||GENRE.Movie, ang=118+(ghash(title)%84), gl=kind==='hero'?44:22;
+    const ov=kind==='hero'?`<div class="badge">${genre}</div><div class="pttl">${title}</div>`:'';
+    return `<div class="poster ${kind}" title="${title}" style="background:linear-gradient(${ang}deg,${g.a},${g.b})">`+
+           `<span class="glyph" style="font-size:${gl}px">${g.ic}</span>${ov}</div>`;
+  }
+
   const content=[
     ['Origin Decider 2025','Sport','sport','Sport Live',8.4,96],
     ['National Grand Final','Sport','sport','Sport Live',7.2,94],
@@ -480,11 +528,16 @@ function initSeg(){
   const max=Math.max(...content.map(r=>r[4]));
   document.getElementById('contentBody').innerHTML=content.map((r,i)=>
     `<tr><td class="num" style="color:var(--green)">${i+1}</td>`+
-    `<td><strong>${r[0]}</strong></td>`+
+    `<td><div style="display:flex;align-items:center;gap:11px;">${poster(r[0],r[1],'thumb')}<strong>${r[0]}</strong></div></td>`+
     `<td style="color:var(--muted)">${r[1]}</td>`+
     `<td><span class="tag ${r[2]}">${r[3]}</span></td>`+
     `<td><div class="bar-cell"><div class="b" style="width:${Math.round(r[4]/max*90)}px"></div><span class="num">${r[4].toFixed(1)}M</span></div></td>`+
     `<td class="num" style="color:${r[5]>=90?'var(--green)':r[5]>=80?'var(--yellow)':'var(--muted)'}">${r[5]}%</td></tr>`
+  ).join('');
+
+  document.getElementById('trendingStrip').innerHTML=content.slice(0,8).map(r=>
+    `<div class="trend-item">${poster(r[0],r[1],'hero')}`+
+    `<div class="trend-meta"><span class="num" style="color:var(--green)">${r[4].toFixed(1)}M hrs</span> &middot; ${r[3]}</div></div>`
   ).join('');
 }
 
