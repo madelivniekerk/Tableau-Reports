@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>StreamCo · Streaming Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg0:#070806;--bg1:#0b0d07;--bg2:#11150b;
+  --green:#C2F94A;--green2:#9FE03A;--green3:#7BC22B;
+  --yellow:#FFE000;--yellow2:#FFC800;
+  --pink:#FF7AC8;--cyan:#6BE3D2;--sage:#C9D6A0;
+  --text:#eef3df;--muted:#8d9670;--faint:#161b0d;
+  --card-border:rgba(194,249,74,0.16);--grid:rgba(194,249,74,0.08);
+}
+body{min-height:100vh;color:var(--text);font-family:'DM Sans',system-ui,sans-serif;
+  background-color:var(--bg0);
+  background-image:
+    radial-gradient(ellipse 60% 50% at 12% 10%,rgba(194,249,74,0.13) 0%,transparent 60%),
+    radial-gradient(ellipse 55% 60% at 88% 90%,rgba(255,224,0,0.10) 0%,transparent 60%),
+    linear-gradient(180deg,#070806 0%,#0c0f07 50%,#070806 100%);
+  overflow-x:hidden;}
+
+/* Header */
+.header{background:rgba(6,8,4,0.94);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(194,249,74,0.18);padding:20px 44px 0;position:relative;z-index:2;}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding-bottom:18px;}
+.logo-group{display:flex;align-items:center;gap:14px;}
+.logo-icon{width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,#7BC22B,#C2F94A 55%,#FFE000);
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:#0a0d04;
+  box-shadow:0 0 26px rgba(194,249,74,0.45);}
+.logo-title{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:#eaffc0;letter-spacing:-0.01em;}
+.logo-sub{font-size:10px;color:var(--green);margin-top:3px;letter-spacing:0.09em;font-weight:500;text-transform:uppercase;}
+.as-at{text-align:right;background:rgba(194,249,74,0.07);
+  border:1px solid rgba(194,249,74,0.22);border-radius:10px;padding:9px 16px;}
+.as-at-label{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:0.10em;margin-bottom:3px;}
+.as-at-val{font-family:'Sora',sans-serif;font-size:20px;font-weight:700;color:var(--yellow);}
+.as-at-sub{font-size:9px;color:var(--muted);margin-top:2px;}
+
+/* Tab nav */
+.tabnav{display:flex;gap:6px;align-items:flex-end;}
+.tabbtn{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--muted);
+  padding:11px 22px;cursor:pointer;border:1px solid transparent;border-bottom:none;
+  border-radius:9px 9px 0 0;background:rgba(194,249,74,0.04);transition:all .15s;display:flex;align-items:center;gap:8px;}
+.tabbtn .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.6;}
+.tabbtn:hover{color:var(--text);background:rgba(194,249,74,0.09);}
+.tabbtn.active{color:#0a0d04;background:linear-gradient(135deg,var(--green),var(--green2));
+  border-color:var(--green);box-shadow:0 -2px 16px rgba(194,249,74,0.30);}
+.tabbtn.active .dot{background:#0a0d04;opacity:1;}
+.tabbtn.t2.active{background:linear-gradient(135deg,var(--yellow),var(--yellow2));border-color:var(--yellow);
+  box-shadow:0 -2px 16px rgba(255,224,0,0.28);}
+
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:0;
+  border:1px solid rgba(194,249,74,0.16);border-radius:12px;overflow:hidden;margin:18px 0 4px;}
+.kpi{padding:14px 16px;border-right:1px solid rgba(194,249,74,0.09);background:rgba(11,13,7,0.72);}
+.kpi:last-child{border-right:none;}
+.kpi-val{font-family:'Sora',sans-serif;font-size:25px;font-weight:700;line-height:1;margin-bottom:4px;}
+.kpi-lbl{font-size:10px;color:var(--muted);font-weight:500;letter-spacing:0.03em;}
+.kpi-note{font-size:9px;color:var(--muted);opacity:0.65;margin-top:3px;}
+.kpi.g .kpi-val{color:var(--green);} .kpi.y .kpi-val{color:var(--yellow);}
+.kpi.w .kpi-val{color:#eef3df;} .kpi.p .kpi-val{color:var(--pink);} .kpi.c .kpi-val{color:var(--cyan);}
+
+/* Story panel */
+.story-panel{background:rgba(194,249,74,0.05);border:1px solid rgba(194,249,74,0.12);
+  border-radius:11px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;margin:14px 0;}
+.story-icon{font-size:19px;flex-shrink:0;margin-top:1px;}
+.story-title{font-family:'Sora',sans-serif;font-size:12px;font-weight:600;color:var(--green);margin-bottom:3px;}
+.story-text{font-size:11px;color:var(--muted);line-height:1.65;max-width:1150px;}
+.story-text strong{color:var(--text);}
+.story-panel.y{background:rgba(255,224,0,0.05);border-color:rgba(255,224,0,0.14);}
+.story-panel.y .story-title{color:var(--yellow);}
+
+/* Layout */
+.page{max-width:1320px;margin:0 auto;padding:14px 24px 60px;position:relative;z-index:2;}
+.sec{font-family:'Sora',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.14em;
+  color:var(--green);text-transform:uppercase;margin:18px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--faint);}
+.sec.y{color:var(--yellow);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.grid23{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
+.mb{margin-bottom:16px;}
+.card{background:rgba(11,13,7,0.84);backdrop-filter:blur(14px);
+  border:1px solid var(--card-border);border-radius:14px;padding:20px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.45),inset 0 1px 0 rgba(194,249,74,0.06);}
+.card-title{font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:#eaffc0;margin-bottom:2px;}
+.card-sub{font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
+.ch200{position:relative;height:200px;}.ch240{position:relative;height:240px;}
+.ch260{position:relative;height:260px;}.ch300{position:relative;height:300px;}
+
+/* Tables */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{text-align:left;font-size:10px;font-weight:600;letter-spacing:0.05em;color:var(--muted);
+  text-transform:uppercase;padding:8px 10px;border-bottom:1px solid rgba(194,249,74,0.14);}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(194,249,74,0.06);color:var(--text);}
+.tbl tr:hover td{background:rgba(194,249,74,0.04);}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:600;}
+.tag.sport{background:rgba(194,249,74,0.16);color:var(--green);}
+.tag.ondemand{background:rgba(255,122,200,0.16);color:var(--pink);}
+.tag.premium{background:rgba(255,224,0,0.16);color:var(--yellow);}
+.tag.allaccess{background:rgba(107,227,210,0.16);color:var(--cyan);}
+.bar-cell{display:flex;align-items:center;gap:8px;}
+.bar-cell .b{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--green3),var(--green));}
+.num{font-family:'Sora',sans-serif;font-weight:600;}
+
+/* Cohort heatmap */
+.heat{width:100%;border-collapse:separate;border-spacing:4px;font-size:11px;}
+.heat th{font-size:10px;color:var(--muted);font-weight:600;padding:4px;text-align:center;}
+.heat td{text-align:center;padding:9px 4px;border-radius:6px;font-weight:600;color:#0a0d04;}
+.heat .rl{background:none!important;color:var(--muted);text-align:left;font-weight:500;}
+
+/* Tabs panels */
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.footer{text-align:center;padding:16px;font-size:10px;color:var(--muted);position:relative;z-index:2;}
+.footer span{color:var(--green);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-group">
+      <div class="logo-icon">&#9654;</div>
+      <div>
+        <div class="logo-title">StreamCo &middot; Streaming Intelligence</div>
+        <div class="logo-sub">Sport Live &middot; On Demand &middot; Premium TV &middot; All-Access &nbsp;|&nbsp; Subscription &middot; Retention &middot; Segmentation &middot; Content</div>
+      </div>
+    </div>
+    <div class="as-at">
+      <div class="as-at-label">&#11044; REPORTING PERIOD</div>
+      <div class="as-at-val">FY25</div>
+      <div class="as-at-sub">Rolling 12 months &middot; mock data</div>
+    </div>
+  </div>
+  <div class="tabnav">
+    <div class="tabbtn active" data-tab="subs"><span class="dot"></span>Subscriptions &amp; Revenue</div>
+    <div class="tabbtn t2" data-tab="churn"><span class="dot"></span>Retention &amp; Churn</div>
+    <div class="tabbtn" data-tab="seg"><span class="dot"></span>Segmentation &amp; Content</div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ============================ TAB 1: SUBSCRIPTIONS ============================ -->
+<div class="tab-panel active" id="tab-subs">
+  <div class="kpi-row">
+    <div class="kpi g"><div class="kpi-val">2.84M</div><div class="kpi-lbl">Total Subscribers</div><div class="kpi-note">across all platforms</div></div>
+    <div class="kpi y"><div class="kpi-val">2.61M</div><div class="kpi-lbl">Active Subscribers</div><div class="kpi-note">91.9% of base</div></div>
+    <div class="kpi w"><div class="kpi-val">$89.40</div><div class="kpi-lbl">Blended ARPU</div><div class="kpi-note">monthly, per account</div></div>
+    <div class="kpi g"><div class="kpi-val">$233.4M</div><div class="kpi-lbl">Monthly Recurring Rev.</div><div class="kpi-note">+4.2% YoY</div></div>
+    <div class="kpi y"><div class="kpi-val">+18.2K</div><div class="kpi-lbl">Net Adds (latest mo.)</div><div class="kpi-note">61K new &middot; 43K churned</div></div>
+  </div>
+
+  <div class="story-panel">
+    <div class="story-icon">&#128202;</div>
+    <div>
+      <div class="story-title">Streaming-led growth &mdash; All-Access bundles lifting blended ARPU</div>
+      <div class="story-text">
+        The base grew from <strong>2.66M to 2.84M</strong> over the rolling year (+6.8%), driven by <strong>sports</strong> seasonality
+        and the <strong>All-Access</strong> aggregation bundle. Net adds spike around the <strong>winter sports window (May&ndash;Jul)</strong>.
+        <strong>Platinum &amp; All-Access</strong> packages carry the highest ARPU and anchor revenue despite smaller volumes.
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Subscriber Base &amp; Flow &middot; Rolling 12 Months</div>
+  <div class="grid23 mb">
+    <div class="card">
+      <div class="card-title">Total Subscriber Base Over Time</div>
+      <div class="card-sub">Active subscribers (millions). Steady climb with sports-season acceleration mid-year.</div>
+      <div class="ch260"><canvas id="subGrowth"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">New vs Cancelled (000s / month)</div>
+      <div class="card-sub">Gross additions (green) against cancellations (yellow). The gap is net adds.</div>
+      <div class="ch260"><canvas id="newCancel"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec">Package Mix &amp; Monetisation</div>
+  <div class="grid3 mb">
+    <div class="card">
+      <div class="card-title">Subscribers by Package</div>
+      <div class="card-sub">Share of the active base across product tiers.</div>
+      <div class="ch240"><canvas id="packageMix"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">ARPU by Package ($/mo)</div>
+      <div class="card-sub">Average revenue per account. Platinum and All-Access bundles lead.</div>
+      <div class="ch240"><canvas id="arpuPackage"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Revenue Contribution by Package ($M/mo)</div>
+      <div class="card-sub">Subscribers &times; ARPU &mdash; where the money actually comes from.</div>
+      <div class="ch240"><canvas id="revPackage"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ TAB 2: RETENTION & CHURN ============================ -->
+<div class="tab-panel" id="tab-churn">
+  <div class="kpi-row">
+    <div class="kpi y"><div class="kpi-val">1.9%</div><div class="kpi-lbl">Monthly Churn Rate</div><div class="kpi-note">latest month</div></div>
+    <div class="kpi w"><div class="kpi-val">18.4%</div><div class="kpi-lbl">Annualised Churn</div><div class="kpi-note">trailing 12 mo.</div></div>
+    <div class="kpi g"><div class="kpi-val">41 mo</div><div class="kpi-lbl">Avg Tenure</div><div class="kpi-note">active accounts</div></div>
+    <div class="kpi y"><div class="kpi-val">34%</div><div class="kpi-lbl">Save Rate</div><div class="kpi-note">of save-team contacts</div></div>
+    <div class="kpi p"><div class="kpi-val">86.1K</div><div class="kpi-lbl">At-Risk Accounts</div><div class="kpi-note">propensity model, next 60d</div></div>
+  </div>
+
+  <div class="story-panel y">
+    <div class="story-icon">&#9888;&#65039;</div>
+    <div>
+      <div class="story-title">Early tenure is where churn lives &mdash; first 6 months drive most loss</div>
+      <div class="story-text">
+        New accounts churn at <strong>4.8%/mo in months 0&ndash;6</strong> versus <strong>0.5%/mo after 5 years</strong>.
+        <strong>Price (31%)</strong> and <strong>content gaps (22%)</strong> are the top stated reasons, with
+        <strong>competitor switching (19%)</strong> to rival streamers close behind. Retention curves flatten
+        sharply after month 4 &mdash; surviving the onboarding window is the single biggest lever.
+      </div>
+    </div>
+  </div>
+
+  <div class="sec y">Churn Dynamics</div>
+  <div class="grid23 mb">
+    <div class="card">
+      <div class="card-title">Monthly Churn Rate Trend</div>
+      <div class="card-sub">Percentage of the active base cancelling each month. Dips during sports season.</div>
+      <div class="ch260"><canvas id="churnTrend"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Churn Rate by Tenure Cohort</div>
+      <div class="card-sub">Monthly churn by how long the account has been subscribed.</div>
+      <div class="ch260"><canvas id="churnTenure"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec y">Retention Curve &amp; Drivers</div>
+  <div class="grid2 mb">
+    <div class="card">
+      <div class="card-title">Retention Curve &mdash; % Retained by Month Since Signup</div>
+      <div class="card-sub">Survival of a signup cohort. The steep early drop is the onboarding cliff.</div>
+      <div class="ch260"><canvas id="retCurve"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Stated Cancellation Reasons</div>
+      <div class="card-sub">Exit-survey breakdown of why subscribers leave.</div>
+      <div class="ch260"><canvas id="churnReasons"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec y">Cohort Retention Heatmap</div>
+  <div class="card mb">
+    <div class="card-title">% Retained by Signup Cohort &times; Months Later</div>
+    <div class="card-sub">Each row is a monthly signup cohort; columns track the share still subscribed N months on. Greener = stickier.</div>
+    <div id="cohortHeat" style="margin-top:8px;"></div>
+  </div>
+</div>
+
+<!-- ============================ TAB 3: SEGMENTATION & CONTENT ============================ -->
+<div class="tab-panel" id="tab-seg">
+  <div class="kpi-row">
+    <div class="kpi g"><div class="kpi-val">6</div><div class="kpi-lbl">Behavioural Segments</div><div class="kpi-note">k-means on viewing + value</div></div>
+    <div class="kpi y"><div class="kpi-val">24%</div><div class="kpi-lbl">Top Segment Share</div><div class="kpi-note">"Sports Diehards"</div></div>
+    <div class="kpi w"><div class="kpi-val">18.6 hrs</div><div class="kpi-lbl">Avg Weekly Viewing</div><div class="kpi-note">per active account</div></div>
+    <div class="kpi c"><div class="kpi-val">32.4K</div><div class="kpi-lbl">Content Titles</div><div class="kpi-note">live + on-demand catalogue</div></div>
+    <div class="kpi g"><div class="kpi-val">71</div><div class="kpi-lbl">Engagement Index</div><div class="kpi-note">0&ndash;100, +5 YoY</div></div>
+  </div>
+
+  <div class="story-panel">
+    <div class="story-icon">&#127916;</div>
+    <div>
+      <div class="story-title">Sport anchors the base; drama drives marathon engagement</div>
+      <div class="story-text">
+        <strong>Sports Diehards (24%)</strong> and <strong>Family Streamers (21%)</strong> are the two largest segments, but
+        <strong>Premium Loyalists</strong> deliver the highest ARPU ($138) and tenure. <strong>Sport leads weekly viewing hours</strong>,
+        while <strong>drama titles</strong> (The Penguin, House of the Dragon) post the highest completion rates &mdash; the stickiest content for retention.
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">Customer Segments</div>
+  <div class="grid23 mb">
+    <div class="card">
+      <div class="card-title">Base Composition by Segment</div>
+      <div class="card-sub">Share of active subscribers in each behavioural segment.</div>
+      <div class="ch260"><canvas id="segMix"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Segment Value Matrix</div>
+      <div class="card-sub">ARPU (x) vs weekly viewing hours (y); bubble size = segment population. Top-right = high value &amp; high engagement.</div>
+      <div class="ch260"><canvas id="segMatrix"></canvas></div>
+    </div>
+  </div>
+
+  <div class="sec">Content Engagement</div>
+  <div class="grid2 mb">
+    <div class="card">
+      <div class="card-title">Weekly Viewing Hours by Genre</div>
+      <div class="card-sub">Average hours per active account, by content genre.</div>
+      <div class="ch240"><canvas id="genreHours"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Share of Viewing by Platform</div>
+      <div class="card-sub">Where engagement happens across the StreamCo streaming stack.</div>
+      <div class="ch240"><canvas id="platformMix"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card mb">
+    <div class="card-title">Top Content &middot; Last 90 Days</div>
+    <div class="card-sub">Most-streamed titles by total account-hours, with completion rate.</div>
+    <table class="tbl" style="margin-top:6px;">
+      <thead><tr><th>#</th><th>Title</th><th>Genre</th><th>Platform</th><th>Hours Streamed</th><th>Completion</th></tr></thead>
+      <tbody id="contentBody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<div class="footer">StreamCo &middot; Streaming Intelligence Dashboard &nbsp;|&nbsp; <span>Mock demonstration data</span> &middot; built with Chart.js</div>
+
+<script>
+// ---- Theme ----
+const G='#C2F94A',G2='#9FE03A',G3='#7BC22B',Y='#FFE000',Y2='#FFC800',PK='#FF7AC8',CY='#6BE3D2',SAGE='#C9D6A0',WHITE='#EAF2D0';
+const GRID='rgba(194,249,74,0.07)',TICK='#8d9670',LBL='#b9c98e';
+Chart.defaults.color=TICK;
+Chart.defaults.font.family="'DM Sans',system-ui,sans-serif";
+Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.boxWidth=9;
+Chart.defaults.plugins.legend.labels.padding=11;
+Chart.defaults.plugins.legend.labels.color=LBL;
+function hexA(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;}
+const xA=(e={})=>Object.assign({grid:{display:false},ticks:{color:LBL}},e);
+const yA=(e={})=>Object.assign({grid:{color:GRID},ticks:{color:TICK}},e);
+
+const MONTHS=['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'];
+
+// =================== TAB 1 ===================
+function initSubs(){
+  new Chart(subGrowth,{type:'line',
+    data:{labels:MONTHS,datasets:[{label:'Active subscribers (M)',
+      data:[2.66,2.68,2.69,2.71,2.72,2.74,2.76,2.77,2.79,2.81,2.83,2.84],
+      borderColor:G,backgroundColor:hexA(G,0.12),tension:0.4,borderWidth:2.5,pointRadius:0,fill:true}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'M subscribers'}}},
+      scales:{y:yA({ticks:{color:TICK,callback:v=>v.toFixed(2)+'M'}}),x:xA()}}});
+
+  new Chart(newCancel,{type:'bar',
+    data:{labels:MONTHS,datasets:[
+      {label:'New',data:[42,38,45,51,40,44,58,49,46,52,55,61],backgroundColor:G,borderRadius:3},
+      {label:'Cancelled',data:[31,33,30,36,38,35,29,34,37,33,36,43],backgroundColor:Y,borderRadius:3}]},
+    options:{plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'K'}}},
+      scales:{y:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'K'}}),x:xA()}}});
+
+  const PKG=['Entertainment','Sport Live','On Demand','All-Access Bundle','Platinum'];
+  new Chart(packageMix,{type:'doughnut',
+    data:{labels:PKG,datasets:[{data:[0.92,0.64,0.58,0.39,0.31],
+      backgroundColor:[G,Y,PK,CY,WHITE],borderColor:'#0b0d07',borderWidth:2,hoverOffset:6}]},
+    options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:LBL,font:{size:10}}},
+      tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(2)+'M'}}}}});
+
+  new Chart(arpuPackage,{type:'bar',
+    data:{labels:['Entertainment','Sport Live','On Demand','All-Access','Platinum'],datasets:[{label:'ARPU $',
+      data:[72,95,81,88,134],backgroundColor:[hexA(G,.85),hexA(Y,.85),hexA(PK,.8),hexA(CY,.8),G],borderRadius:5}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.y+' / mo'}}},
+      scales:{y:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>'$'+v}}),x:xA()}}});
+
+  // rev = subs(M) * arpu  -> $M/mo
+  const subs=[0.92,0.64,0.58,0.39,0.31],arpu=[72,95,81,88,134];
+  new Chart(revPackage,{type:'bar',
+    data:{labels:['Entertainment','Sport Live','On Demand','All-Access','Platinum'],datasets:[{label:'Revenue $M',
+      data:subs.map((s,i)=>+(s*arpu[i]).toFixed(1)),backgroundColor:hexA(Y,.8),borderRadius:5}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.x.toFixed(1)+'M / mo'}}},
+      scales:{x:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>'$'+v+'M'}}),y:xA()}}});
+}
+
+// =================== TAB 2 ===================
+function initChurn(){
+  new Chart(churnTrend,{type:'line',
+    data:{labels:MONTHS,datasets:[{label:'Monthly churn %',
+      data:[2.1,2.0,1.9,2.2,2.3,2.1,1.8,1.9,2.0,1.9,1.85,1.9],
+      borderColor:Y,backgroundColor:hexA(Y,0.10),tension:0.4,borderWidth:2.5,pointRadius:0,fill:true}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+'% churn'}}},
+      scales:{y:yA({ticks:{color:TICK,callback:v=>v.toFixed(1)+'%'}}),x:xA()}}});
+
+  new Chart(churnTenure,{type:'bar',
+    data:{labels:['0-6m','6-12m','1-2y','2-3y','3-5y','5y+'],datasets:[{label:'Monthly churn %',
+      data:[4.8,3.1,2.0,1.4,0.9,0.5],
+      backgroundColor:['#FFD000','#E8E040','#C2F94A','#9FE03A','#7BC22B','#5C9A1F'],borderRadius:5}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+'% / mo'}}},
+      scales:{y:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),x:xA()}}});
+
+  new Chart(retCurve,{type:'line',
+    data:{labels:['M0','M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
+      datasets:[{label:'% retained',data:[100,92,86,81,77,74,71,69,67,65,63,62,61],
+        borderColor:G,backgroundColor:hexA(G,0.10),tension:0.35,borderWidth:2.5,pointRadius:3,pointBackgroundColor:G,fill:true}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'% still subscribed'}}},
+      scales:{y:yA({min:50,max:100,ticks:{color:TICK,callback:v=>v+'%'}}),x:xA()}}});
+
+  new Chart(churnReasons,{type:'bar',
+    data:{labels:['Price too high','Content gaps','Switched to competitor','Not enough usage','Technical / UX','Moving / other'],
+      datasets:[{label:'% of cancels',data:[31,22,19,14,8,6],
+        backgroundColor:[Y,hexA(Y,.8),PK,hexA(G,.8),CY,SAGE],borderRadius:4}]},
+    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.x+'% of cancellations'}}},
+      scales:{x:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'%'}}),y:xA({ticks:{color:LBL,font:{size:10}}})}}});
+
+  // Cohort heatmap
+  const cohorts=['Jan','Feb','Mar','Apr','May','Jun'];
+  const cols=['M1','M2','M3','M4','M5','M6'];
+  const data=[
+    [92,84,79,75,72,70],
+    [91,83,78,74,71,69],
+    [93,86,81,77,75,73],
+    [90,82,77,73,70,68],
+    [94,88,84,81,79,77],
+    [92,85,80,76,74,72]];
+  function heatColor(v){ // 60->red-ish dim, 95->bright green
+    const t=Math.max(0,Math.min(1,(v-60)/35));
+    const r=Math.round(255-t*120), g=Math.round(120+t*135), b=Math.round(40+t*30);
+    return `rgb(${r},${g},${b})`;
+  }
+  let h='<table class="heat"><thead><tr><th class="rl">Signup cohort</th>'+cols.map(c=>`<th>${c}</th>`).join('')+'</tr></thead><tbody>';
+  data.forEach((row,i)=>{h+=`<tr><td class="rl">${cohorts[i]} 2025</td>`+row.map(v=>`<td style="background:${heatColor(v)}">${v}%</td>`).join('')+'</tr>';});
+  h+='</tbody></table>';
+  document.getElementById('cohortHeat').innerHTML=h;
+}
+
+// =================== TAB 3 ===================
+function initSeg(){
+  const SEG=['Sports Diehards','Family Streamers','Movie Buffs','Premium Loyalists','Casual Viewers','Drama Devotees'];
+  new Chart(segMix,{type:'doughnut',
+    data:{labels:SEG,datasets:[{data:[24,21,17,14,15,9],
+      backgroundColor:[G,Y,PK,CY,SAGE,'#B98AE0'],borderColor:'#0b0d07',borderWidth:2,hoverOffset:6}]},
+    options:{cutout:'56%',plugins:{legend:{position:'right',labels:{color:LBL,font:{size:10}}},
+      tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'% of base'}}}}});
+
+  // value matrix: x=ARPU, y=weekly hrs, r=size
+  const pts=[
+    {l:'Sports Diehards',x:102,y:22,r:24,c:G},
+    {l:'Family Streamers',x:79,y:19,r:21,c:Y},
+    {l:'Movie Buffs',x:84,y:15,r:17,c:PK},
+    {l:'Premium Loyalists',x:138,y:17,r:14,c:CY},
+    {l:'Casual Viewers',x:58,y:7,r:15,c:SAGE},
+    {l:'Drama Devotees',x:73,y:16,r:9,c:'#B98AE0'}];
+  new Chart(segMatrix,{type:'bubble',
+    data:{datasets:pts.map(p=>({label:p.l,data:[{x:p.x,y:p.y,r:6+p.r*0.7}],backgroundColor:hexA(p.c,.55),borderColor:p.c,borderWidth:1.5}))},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: $${c.raw.x} ARPU · ${c.raw.y} hrs/wk`}}},
+      scales:{x:yA({title:{display:true,text:'ARPU ($/mo)',color:TICK},ticks:{color:TICK,callback:v=>'$'+v}}),
+        y:yA({title:{display:true,text:'Viewing hrs / week',color:TICK},ticks:{color:TICK}})}}});
+
+  new Chart(genreHours,{type:'bar',
+    data:{labels:['Sport','Drama','Movies','Reality','Kids','Documentary','News'],
+      datasets:[{label:'hrs/wk',data:[6.2,4.1,3.4,2.3,2.0,1.3,1.1],
+        backgroundColor:[G,PK,Y,CY,SAGE,'#B98AE0',hexA(G,.5)],borderRadius:5}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+' hrs/week'}}},
+      scales:{y:yA({beginAtZero:true,ticks:{color:TICK,callback:v=>v+'h'}}),x:xA()}}});
+
+  new Chart(platformMix,{type:'doughnut',
+    data:{labels:['Sport Live','On Demand','Premium TV','All-Access'],datasets:[{data:[34,28,23,15],
+      backgroundColor:[G,PK,Y,CY],borderColor:'#0b0d07',borderWidth:2,hoverOffset:6}]},
+    options:{cutout:'58%',plugins:{legend:{position:'bottom',labels:{color:LBL,font:{size:10}}},
+      tooltip:{callbacks:{label:c=>c.label+': '+c.parsed+'% of viewing'}}}}});
+
+  const content=[
+    ['Origin Decider 2025','Sport','sport','Sport Live',8.4,96],
+    ['National Grand Final','Sport','sport','Sport Live',7.2,94],
+    ['The Outsider','Drama','ondemand','On Demand',5.1,88],
+    ['Dynasty of Dragons S2','Drama','ondemand','On Demand',4.6,85],
+    ['After the Fall S2','Drama','ondemand','On Demand',4.0,90],
+    ['Desert Horizon','Movie','premium','Premium TV',3.3,79],
+    ['Survivor Trials','Reality','allaccess','All-Access',2.8,72],
+    ['Dream Home Reno','Lifestyle','premium','Premium TV',1.9,68]];
+  const max=Math.max(...content.map(r=>r[4]));
+  document.getElementById('contentBody').innerHTML=content.map((r,i)=>
+    `<tr><td class="num" style="color:var(--green)">${i+1}</td>`+
+    `<td><strong>${r[0]}</strong></td>`+
+    `<td style="color:var(--muted)">${r[1]}</td>`+
+    `<td><span class="tag ${r[2]}">${r[3]}</span></td>`+
+    `<td><div class="bar-cell"><div class="b" style="width:${Math.round(r[4]/max*90)}px"></div><span class="num">${r[4].toFixed(1)}M</span></div></td>`+
+    `<td class="num" style="color:${r[5]>=90?'var(--green)':r[5]>=80?'var(--yellow)':'var(--muted)'}">${r[5]}%</td></tr>`
+  ).join('');
+}
+
+// ---- Tab switching with lazy chart init ----
+const inited={subs:false,churn:false,seg:false};
+const initFns={subs:initSubs,churn:initChurn,seg:initSeg};
+function showTab(id){
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+  if(!inited[id]){initFns[id]();inited[id]=true;}
+}
+document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+initSubs();inited.subs=true;
+</script>
+</body>
+</html>
